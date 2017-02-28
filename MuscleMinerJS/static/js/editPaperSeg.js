@@ -82,9 +82,10 @@
     paper.view.zoom=(sw * z) / magicV;
   }
 
-var myInterval;
-var counter=0;
-var running;
+    var myInterval;
+    var counter=0;
+    var running;
+    
   $(document).submit(function(e){
     var form = jQuery(e.target);
     if(form.is("#frmsegment")){ // check if this is the form that you want (delete this check to apply this to all forms)
