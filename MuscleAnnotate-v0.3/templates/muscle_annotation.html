@@ -1,0 +1,100 @@
+<!--
+@Author: Pingjun Chen <Pingjun>
+@Date:   2017-01-30T20:43:35-05:00
+@Email:  codingPingjun@gmail.com
+@Filename: muscle_annotation.html
+@Last modified by:   Pingjun
+@Last modified time: 2017-02-06T23:31:16-05:00
+@License: The MIT License (MIT)
+@Copyright: Lab BICI2. All Rights Reserved.
+-->
+
+<html>
+<head>
+	<title>Muscle Diagnosis</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,user-scalable=no" />
+	<link rel="stylesheet" href="../static/css/style.css" type="text/css" />
+</head>
+
+<body>
+<div id="menuButton">
+	<img class="button" id="openMenu" title="Menu" src="../static/img/openMenu.svg" />
+</div>
+
+<div id="menuBar" class="table">
+	<div class="row">
+		<div id="login"></div>
+		<img class="button" id="closeMenu" title="Close Menu" src="../static/img/closeMenu.svg" />
+	</div>
+
+	<div class="row">
+		<div id="myNavigator"></div>
+	</div>
+
+	<div class="row" style="height:10px">
+		<div class="cell" style="text-align:center">
+			<div class="buttonGroup">
+				<div>
+					<img class="button" id="prev" title="Previous slice" src="../static/img/prev.svg" />
+					<input id="slice-name" list="slice-names" style="width:80px" />
+					<img class="button" id="next" title="Next slice"     src="../static/img/next.svg" />
+				</div>
+				<input step="1" max="0" min="0" id="slider" type="range"/>
+			</div>
+			<div class="buttonGroup">
+				<img class="button" id="zoom"          title="Navigator"              src="../static/img/navigate.svg" />
+				<img class="button" id="home"          title="Home"                   src="../static/img/home.svg" />
+				<img class="button" id="zoom-in"       title="Zoom in"                src="../static/img/plus.svg" />
+				<img class="button" id="zoom-out"      title="Zoom out"               src="../static/img/minus.svg" />
+			</div>
+			<div class="buttonGroup">
+				<img class="button" id="select"        title="Select"                 src="../static/img/select.svg" />
+				<img class="button" id="draw"          title="Draw"                   src="../static/img/draw.svg" />
+				<img class="button" id="draw-polygon"  title="draw-polygon"           src="../static/img/draw-polygon.svg" />
+				<img class="button" id="delete"        title="Delete region"          src="../static/img/delete.svg" />
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="cell">
+			<div>
+				<br /> &emsp; <span style="font-weight:bold;font-size:20px;vertical-align">Conclusion</span>
+				<img class="button" id="save" title="Save annotations" src="../static/img/save.svg" align="middle" />
+			</div>
+			<div>
+				<input type="radio" name="conclusion" value="dm" checked>DM</input>
+  		  		<input type="radio" name="conclusion" value="pm">PM</input>
+  				<input type="radio" name="conclusion" value="ibm">IBM</input>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="cell">
+			<br />
+			&emsp; <span style="font-weight:bold;font-size:20px;">Regions</span>
+			<div id="regionList" style="height:auto;margin-bottom:0;overflow-y:hidden"></div>
+		</div>
+	</div>
+</div>
+
+<!-- OpenSeadragon viewer -->
+<div id="openseadragon1" style="width:100%">
+</div>
+
+<!-- Load javascript -->
+<script src="../static/js/openseadragon/openseadragon.min.js"></script>
+<script src="../static/js/openseadragon-viewerinputhook.min.js"></script>
+<script src="../static/js/OpenSeadragonScalebar/openseadragon-scalebar.js"></script>
+<script src="../static/js/openseadragon-imaginghelper.min.js"></script>
+<script src="../static/js/jquery-1.11.0.min.js"></script>
+<script src="../static/js/paper-full.min.js"></script>
+<script src="../static/js/neurolex-ontology.js"></script>
+<script src="../static/js/muscledraw.js"></script>
+<script src="../static/js/recordstop.js"></script>
+<script src="../static/js/musclerecord.js"></script>
+
+</body>
+</html>
