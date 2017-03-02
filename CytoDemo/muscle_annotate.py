@@ -17,6 +17,9 @@ from openslide.deepzoom import DeepZoomGenerator
 from optparse import OptionParser
 from unicodedata import normalize
 import os, re, glob, json, base64
+from werkzeug import secure_filename
+from util import dosegmentation, createdz
+from util import delete_files, check_file_size
 
 
 DEEPZOOM_SLIDE = None
@@ -34,6 +37,10 @@ app.config.from_envvar('DEEPZOOM_TILER_SETTINGS', silent=True)
 app.debug = True
 app.config["Files"] = None
 app.config["ANNOTATION_DIR"] = "./static/Annotations/"
+# where you save the dzi for segmentation
+app.config['SAVE_FOLDER_segmentation'] = 'files/segmentation_data/'
+if not os.path.isdir(app.config['SAVE_FOLDER_segmentation']):
+    os.mkdir(app.config['SAVE_FOLDER_segmentation'])
 
 
 class PILBytesIO(BytesIO):
@@ -172,6 +179,8 @@ def getslides(filename):
         load_slide(name)
         slide_url = url_for('dzi', slug=name)
         return slide_url
+    
+#app.config["Files"]["tileSources"][0]
 
 @app.route('/')
 def index():
@@ -208,6 +217,28 @@ def tile(slug, level, col, row, format):
     resp = make_response(buf.getvalue())
     resp.mimetype = 'image/%s' % format
     return resp
+
+
+@app.route('/segmentation', methods=['GET', 'POST'])
+def segmentation():
+    # image should be uploaded and segmentation request be sent
+    if request.method == 'POST':
+        # getting name info
+#        filename = app.config['GLOBAL_FILE_NAME']
+        filename = 'img_mask2.png'
+        prefix = filename[:-3]
+        try:
+            # do segmentation\\
+            filename = prefix + 'png'
+            result = dosegmentation(app.config['SAVE_FOLDER_segmentation'],
+                filename, app.config['SAVE_FOLDER_segmentation'] )
+            return result
+        except Exception as exc:
+            print 'error in loading data ', filename
+            print exc
+            result={}
+            result["error"]=1
+            return jsonify(result)
 
 
 def slugify(text):

@@ -45,9 +45,8 @@ def shutdown():
 @app.route('/segmentation', methods=['GET', 'POST'])
 def segmentation():
     # image should be uploaded and segmentation request be sent
-    print "working here"
     if request.method == 'POST' and app.config['GLOBAL_FILE_NAME'] != '':
-        # getting name info
+        # getting name info 
         filename = app.config['GLOBAL_FILE_NAME']
         prefix = filename[:-3]
         try:
@@ -55,6 +54,10 @@ def segmentation():
             filename = prefix + 'png'
             result = dosegmentation(app.config['SAVE_FOLDER_segmentation'],
                 filename, app.config['SAVE_FOLDER_segmentation'] )
+            print filename
+            print filename
+            print filename
+            print filename
             return result
         except Exception as exc:
             print 'error in loading data ', filename

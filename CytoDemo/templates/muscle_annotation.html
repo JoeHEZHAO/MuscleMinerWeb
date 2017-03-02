@@ -42,6 +42,7 @@
 				</div>
 				<input step="1" max="0" min="0" id="slider" type="range"/>
 			</div>
+<!--
 			<div class="buttonGroup">
 				<img class="button" id="zoom"          title="Navigator"              src="../static/img/navigate.svg" />
 				<img class="button" id="home"          title="Home"                   src="../static/img/home.svg" />
@@ -54,9 +55,22 @@
 				<img class="button" id="draw-polygon"  title="draw-polygon"           src="../static/img/draw-polygon.svg" />
 				<img class="button" id="delete"        title="Delete region"          src="../static/img/delete.svg" />
 			</div>
+-->
+            <div class="buttonGroup">
+				<img class="button" id="zoom"          title="Navigator"              src="../static/img/navigate.svg" />
+				<img class="button" id="edit"          title="Draw"                   src="../static/img/draw.svg" />
+			</div>
+            
+            <div class="buttonGroup">
+                <form id="frmsegment" action="{{ url_for('segmentation') }}" align="center" method=post enctype=multipart/form-data>
+<!--                    <img class="button" id="segmentation" title="Draw" src="../static/img/segmentation_icon.png" />-->
+                    <input type="image" class="circle_image" src="{{ url_for('static', filename = '../static/img/segmentation_icon.png') }}" border="0" alt="Submit">
+                </form>
+            </div>
 		</div>
 	</div>
 
+<!--
 	<div class="row">
 		<div class="cell">
 			<div>
@@ -78,6 +92,7 @@
 			<div id="regionList" style="height:auto;margin-bottom:0;overflow-y:hidden"></div>
 		</div>
 	</div>
+-->
 </div>
 
 <!-- OpenSeadragon viewer -->
@@ -85,16 +100,19 @@
 </div>
 
 <!-- Load javascript -->
+<script src="../static/js/jquery-2.2.3.js"></script>
 <script src="../static/js/openseadragon/openseadragon.min.js"></script>
 <script src="../static/js/openseadragon-viewerinputhook.min.js"></script>
 <script src="../static/js/OpenSeadragonScalebar/openseadragon-scalebar.js"></script>
 <script src="../static/js/openseadragon-imaginghelper.min.js"></script>
-<script src="../static/js/jquery-1.11.0.min.js"></script>
+<script src="../static/js/loadingoverlay.min.js"></script>
 <script src="../static/js/paper-full.min.js"></script>
 <script src="../static/js/neurolex-ontology.js"></script>
-<script src="../static/js/muscledraw.js"></script>
+<script src="../static/js/edit.js"></script>
+<!--
 <script src="../static/js/recordstop.js"></script>
 <script src="../static/js/musclerecord.js"></script>
+-->
 
 </body>
 </html>
