@@ -10,9 +10,9 @@
 */
 
 //(function() {                 // force everything local.
-paper.install(window);
-var debug = 1;
-var localhost='';
+paper.install(window);          // sets Paper objects and classes of 'window' to the global scope
+var debug = 1;                  // whether or not to print debug messages
+var localhost='';               // relative path to localhost
 var dbroot = "http://"+localhost+"/php/microdraw_db.php";
 var ImageInfo = {};             // regions, and projectID (for the paper.js canvas) for each slices, can be accessed by the slice name. (e.g. ImageInfo[imageOrder[viewer.current_page()]])
 // regions contain a paper.js path, a unique ID and a name
@@ -1551,15 +1551,15 @@ function loadPreviousImage() {
 }
 
 
-function resizeAnnotationOverlay() {
-	if( debug ) console.log("> resizeAnnotationOverlay");
-
-	var width = $("body").width();
-	var height = $("body").height();
-	$("canvas.overlay").width(width);
-	$("canvas.overlay").height(height);
-	paper.view.viewSize = [width,height];
-}
+//function resizeAnnotationOverlay() {
+//	if( debug ) console.log("> resizeAnnotationOverlay");
+//
+//	var width = $("body").width();
+//	var height = $("body").height();
+//	$("canvas.overlay").width(width);
+//	$("canvas.overlay").height(height);
+//	paper.view.viewSize = [width,height];
+//}
 
 //function initAnnotationOverlay(data) {
 //	if( debug ) console.log("> initAnnotationOverlay");
@@ -2031,12 +2031,12 @@ function initMicrodraw() {
 		});
 	}
 
-	$(window).resize(function() {
-		$("#regionList").height($(window).height() - $("#regionList").offset().top);
-		resizeAnnotationOverlay();
-	});
+//	$(window).resize(function() {
+//		$("#regionList").height($(window).height() - $("#regionList").offset().top);
+//		resizeAnnotationOverlay();
+//	});
 
-	appendRegionTagsFromOntology(Ontology);
+//	appendRegionTagsFromOntology(Ontology);
 
 	return def.promise();
 }
@@ -2052,15 +2052,15 @@ function initMicrodraw2(obj) {
 	}
 
 	// set default values for new regions (general configuration)
-	if (config.defaultStrokeColor == undefined) config.defaultStrokeColor = 'black';
-	if (config.defaultStrokeWidth == undefined) config.defaultStrokeWidth = 1;
-	if (config.defaultFillAlpha == undefined) config.defaultFillAlpha = 0.5;
-	// set default values for new regions (per-brain configuration)
-	if (obj.configuration) {
-		if (obj.configuration.defaultStrokeColor != undefined) config.defaultStrokeColor = obj.configuration.defaultStrokeColor;
-		if (obj.configuration.defaultStrokeWidth != undefined) config.defaultStrokeWidth = obj.configuration.defaultStrokeWidth;
-		if (obj.configuration.defaultFillAlpha != undefined) config.defaultFillAlpha = obj.configuration.defaultFillAlpha;
-	}
+//	if (config.defaultStrokeColor == undefined) config.defaultStrokeColor = 'black';
+//	if (config.defaultStrokeWidth == undefined) config.defaultStrokeWidth = 1;
+//	if (config.defaultFillAlpha == undefined) config.defaultFillAlpha = 0.5;
+//	// set default values for new regions (per-brain configuration)
+//	if (obj.configuration) {
+//		if (obj.configuration.defaultStrokeColor != undefined) config.defaultStrokeColor = obj.configuration.defaultStrokeColor;
+//		if (obj.configuration.defaultStrokeWidth != undefined) config.defaultStrokeWidth = obj.configuration.defaultStrokeWidth;
+//		if (obj.configuration.defaultFillAlpha != undefined) config.defaultFillAlpha = obj.configuration.defaultFillAlpha;
+//	}
 
 	// init slider that can be used to change between slides
 
@@ -2175,7 +2175,7 @@ $(function() {
 				myOrigin.appName = "microdraw";
 				myOrigin.slice = currentImage;
 				myOrigin.source = params.source;
-				updateUser();
+//				updateUser();
 			}).then(initMicrodraw);
 		} else {
 			params = deparam();
