@@ -383,456 +383,456 @@ function checkRegionSize(reg) {
 /***2
 Interaction: mouse and tap
 */
-function clickHandler(event){
-	if( debug ) console.log("> clickHandler");
-
-	event.stopHandlers = !navEnabled;
-	if( selectedTool == "draw" ) {
-		checkRegionSize(region);
-	}
-}
-
-function pressHandler(event){
-	if( debug ) console.log("> pressHandler");
-
-	if( !navEnabled ) {
-		event.stopHandlers = true;
-		mouseDown(event.originalEvent.layerX,event.originalEvent.layerY);
-	}
-}
-
-function dragHandler(event){
-	if( debug > 1 )
-	console.log("> dragHandler");
-
-	if( !navEnabled ) {
-		event.stopHandlers = true;
-		mouseDrag(event.originalEvent.layerX,event.originalEvent.layerY,event.delta.x,event.delta.y);
-	}
-}
-
-function dragEndHandler(event){
-	if( debug ) console.log("> dragEndHandler");
-
-	if( !navEnabled ) {
-		event.stopHandlers = true;
-		mouseUp();
-	}
-}
-
-function singlePressOnRegion(event) {
-	if( debug ) console.log("> singlePressOnRegion");
-
-	event.stopPropagation();
-	event.preventDefault();
-
-	var el = $(this);
-	var uid;
-	var reg;
-
-	if( debug ) console.log(event);
-	if( event.clientX > 20 ) {
-		if( event.clientX > 50 ) {
-
-			if( el.hasClass("ontology") ) {
-				// Click on regionPicker (ontology selection list)
-				var newName = el.find(".region-name").text();
-				uid = $(".region-tag.selected").attr('id');
-				reg = findRegionByUID(uid);
-				changeRegionName(reg,newName);
-				$("div#regionPicker").appendTo($("body")).hide();
-			}
-			else {
-				// Click on regionList (list or annotated regions)
-				uid = $(this).attr('id');
-				reg = findRegionByUID(uid);
-				if( reg ) {
-					selectRegion(reg);
-				}
-				else
-				console.log("region undefined");
-			}
-		}
-		else {
-			var reg = findRegionByUID(this.id);
-			if( reg.path.fillColor != null ) {
-				if( reg ) {
-					selectRegion(reg);
-				}
-				annotationStyle(reg);
-			}
-		}
-	}
-	else {
-		var reg = findRegionByUID(this.id);
-		toggleRegion(reg);
-	}
-}
-
-function doublePressOnRegion(event) {
-	if( debug ) console.log("> doublePressOnRegion");
-
-	event.stopPropagation();
-	event.preventDefault();
-
-	if( event.clientX > 20 ) {
-		if( event.clientX > 50 ) {
-			if( config.drawingEnabled ) {
-				if( config.regionOntology == true ) {
-					regionPicker(this);
-				}
-				else {
-					var name = prompt("Region name", findRegionByUID(this.id).name);
-					if( name != null ) {
-						changeRegionName(findRegionByUID(this.id), name);
-					}
-				}
-			}
-		}
-		else {
-			var reg = findRegionByUID(this.id);
-			if( reg.path.fillColor != null ) {
-				if( reg ) {
-					selectRegion(reg);
-				}
-				annotationStyle(reg);
-			}
-		}
-	}
-	else {
-		var reg = findRegionByUID(this.id);
-		toggleRegion(reg);
-	}
-}
-
-var tap = false
-function handleRegionTap(event) {
-	/*
-	Handles single and double tap in touch devices
-	*/
-	if( debug ) console.log("> handleRegionTap");
-
-	var caller = this;
-
-	if( !tap ){ //if tap is not set, set up single tap
-		tap = setTimeout(function() {
-			tap = null
-		},300);
-
-		// call singlePressOnRegion(event) using 'this' as context
-		singlePressOnRegion.call(this,event);
-	} else {
-		clearTimeout(tap);
-		tap = null;
-
-		// call doublePressOnRegion(event) using 'this' as context
-		doublePressOnRegion.call(this,event);
-	}
-	if( debug ) console.log("< handleRegionTap");
-}
-
-function mouseDown(x,y) {
-	if( debug > 1 ) console.log("> mouseDown");
-
-	mouseUndo = getUndo();
-	var prevRegion = null;
-	var point = paper.view.viewToProject(new paper.Point(x,y));
-
-	handle = null;
-
-	switch( selectedTool ) {
-		case "select":
-		case "addpoint":
-		case "delpoint":
-		case "addregion":
-		case "delregion":
-		case "splitregion": {
-			var hitResult = paper.project.hitTest(point, {
-				tolerance: 10,
-				stroke: true,
-				segments: true,
-				fill: true,
-				handles: true
-			});
-
-			newRegionFlag = false;
-			if( hitResult ) {
-				var i;
-				for( i = 0; i < ImageInfo[currentImage]["Regions"].length; i++ ) {
-					if( ImageInfo[currentImage]["Regions"][i].path == hitResult.item ) {
-						re = ImageInfo[currentImage]["Regions"][i];
-						break;
-					}
-				}
-
-				// select path
-				if( region && region != re ) {
-					region.path.selected = false;
-					prevRegion = region;
-				}
-				selectRegion(re);
-
-				if( hitResult.type == 'handle-in' ) {
-					handle = hitResult.segment.handleIn;
-					handle.point = point;
-				}
-				else if( hitResult.type == 'handle-out' ) {
-					handle = hitResult.segment.handleOut;
-					handle.point = point;
-				}
-				else if( hitResult.type == 'segment' ) {
-					if( selectedTool == "select" ) {
-						handle = hitResult.segment.point;
-						handle.point = point;
-					}
-					if( selectedTool == "delpoint" ) {
-						hitResult.segment.remove();
-						commitMouseUndo();
-					}
-				}
-				else if( hitResult.type == 'stroke' && selectedTool == "addpoint" ) {
-					region.path
-					.curves[hitResult.location.index]
-					.divide(hitResult.location);
-					region.path.fullySelected = true;
-					commitMouseUndo();
-					paper.view.draw();
-				}
-				else if( selectedTool == "addregion" ) {
-					if( prevRegion ) {
-						var newPath = region.path.unite(prevRegion.path);
-						removeRegion(prevRegion);
-						region.path.remove();
-						region.path = newPath;
-						updateRegionList();
-						selectRegion(region);
-						paper.view.draw();
-						commitMouseUndo();
-						backToSelect();
-					}
-				}
-				else if( selectedTool == "delregion" ) {
-					if( prevRegion ) {
-						var newPath = prevRegion.path.subtract(region.path);
-						removeRegion(prevRegion);
-						prevRegion.path.remove();
-						newRegion({path:newPath});
-						updateRegionList();
-						selectRegion(region);
-						paper.view.draw();
-						commitMouseUndo();
-						backToSelect();
-					}
-				}
-				else if( selectedTool == "splitregion" ) {
-					/*selected region is prevRegion!
-					region is the region that should be split based on prevRegion
-					newRegionPath is outlining that part of region which has not been overlaid by prevRegion
-					i.e. newRegion is what was region
-					and prevRegion color should go to the other part*/
-					if( prevRegion ) {
-						var prevColor = prevRegion.path.fillColor;
-						//color of the overlaid part
-						var color = region.path.fillColor;
-						var newPath = region.path.divide(prevRegion.path);
-
-						removeRegion(prevRegion);
-						region.path.remove();
-
-						region.path = newPath;
-						var newReg;
-						for( i = 0; i < newPath._children.length; i++ )
-						{
-							if( i == 0 ) {
-								region.path = newPath._children[i];
-							}
-							else {
-								newReg = newRegion({path:newPath._children[i]});
-							}
-						}
-						region.path.fillColor = color;
-						if( newReg ) {
-							newReg.path.fillColor = prevColor;
-						}
-						updateRegionList();
-						selectRegion(region);
-						paper.view.draw();
-
-						commitMouseUndo();
-						backToSelect();
-					}
-				}
-				break;
-			}
-			if( hitResult == null && region ) {
-				//deselect paths
-				region.path.selected = false;
-				region = null;
-			}
-			break;
-		}
-		case "draw": {
-			// Start a new region
-			// if there was an older region selected, unselect it
-			if( region ) {
-				region.path.selected = false;
-			}
-			// start a new region
-			var path = new paper.Path({segments:[point]})
-			path.strokeWidth = config.defaultStrokeWidth;
-			region = newRegion({path:path});
-			// signal that a new region has been created for drawing
-			newRegionFlag = true;
-
-			commitMouseUndo();
-			break;
-		}
-		case "draw-polygon": {
-			// is already drawing a polygon or not?
-			if( drawingPolygonFlag == false ) {
-				// deselect previously selected region
-				if( region )
-				region.path.selected = false;
-
-				// Start a new Region with alpha 0
-				var path = new paper.Path({segments:[point]})
-				path.strokeWidth = config.defaultStrokeWidth;
-				region = newRegion({path:path});
-				region.path.fillColor.alpha = 0;
-				region.path.selected = true;
-				drawingPolygonFlag = true;
-				commitMouseUndo();
-			} else {
-				var hitResult = paper.project.hitTest(point, {tolerance:10, segments:true});
-				if( hitResult && hitResult.item == region.path && hitResult.segment.point == region.path.segments[0].point ) {
-					// clicked on first point of current path
-					// --> close path and remove drawing flag
-					finishDrawingPolygon(true);
-				} else {
-					// add point to region
-					region.path.add(point);
-					commitMouseUndo();
-				}
-			}
-			break;
-		}
-		case "rotate":
-		region.origin = point;
-		break;
-	}
-	paper.view.draw();
-}
-
-function mouseDrag(x,y,dx,dy) {
-	//if( debug ) console.log("> mouseDrag");
-
-	// transform screen coordinate into world coordinate
-	var point = paper.view.viewToProject(new paper.Point(x,y));
-
-	// transform screen delta into world delta
-	var orig = paper.view.viewToProject(new paper.Point(0,0));
-	var dpoint = paper.view.viewToProject(new paper.Point(dx,dy));
-	dpoint.x -= orig.x;
-	dpoint.y -= orig.y;
-
-	if( handle ) {
-		handle.x += point.x-handle.point.x;
-		handle.y += point.y-handle.point.y;
-		handle.point = point;
-		commitMouseUndo();
-	} else
-	if( selectedTool == "draw" ) {
-		region.path.add(point);
-	} else
-	if( selectedTool == "select" ) {
-		// event.stopHandlers = true;
-		for( i in ImageInfo[currentImage]["Regions"] ) {
-			var reg = ImageInfo[currentImage]["Regions"][i];
-			if( reg.path.selected ) {
-				reg.path.position.x += dpoint.x;
-				reg.path.position.y += dpoint.y;
-				commitMouseUndo();
-			}
-		}
-	}
-	if( selectedTool == "rotate" ) {
-		event.stopHandlers = true;
-		var degree = parseInt(dpoint.x);
-		var i;
-		for( i in ImageInfo[currentImage]["Regions"] ) {
-			if( ImageInfo[currentImage]["Regions"][i].path.selected ) {
-				ImageInfo[currentImage]["Regions"][i].path.rotate(degree, region.origin);
-				commitMouseUndo();
-			}
-		}
-	}
-	paper.view.draw();
-}
-
-function mouseUp() {
-	if( debug ) console.log("> mouseUp");
-
-	if( newRegionFlag == true ) {
-		region.path.closed = true;
-		region.path.fullySelected = true;
-		// to delete all unnecessary segments while preserving the form of the region to make it modifiable; & adding handles to the segments
-		var orig_segments = region.path.segments.length;
-		region.path.simplify(0);
-		var final_segments = region.path.segments.length;
-		if( debug > 2 ) console.log( parseInt(final_segments/orig_segments*100) + "% segments conserved" );
-	}
-	paper.view.draw();
-}
-
-/*** simplify the region path
-***/
-function simplify() {
-	if( region !== null ) {
-		if( debug ) console.log("> simplifying region path");
-
-		var orig_segments = region.path.segments.length;
-		region.path.simplify();
-		var final_segments = region.path.segments.length;
-		console.log( parseInt(final_segments/orig_segments*100) + "% segments conserved" );
-		paper.view.draw();
-	}
-}
-
-/*** flip region along y-axis around its center point
-***/
-function flipRegion(reg) {
-	if( region !== null ) {
-		if( debug ) console.log("> flipping region");
-
-		var i;
-		for( i in ImageInfo[currentImage]["Regions"] ) {
-			if( ImageInfo[currentImage]["Regions"][i].path.selected ) {
-				ImageInfo[currentImage]["Regions"][i].path.scale(-1, 1);
-			}
-		}
-		paper.view.draw();
-	}
-}
-
-function toggleHandles() {
-	console.log("> toggleHandles");
-	if (region != null) {
-		if (region.path.hasHandles()) {
-			if (confirm('Do you really want to remove the handles?')) {
-				var undoInfo = getUndo();
-				region.path.clearHandles();
-				saveUndo(undoInfo);
-			}
-		}
-		else {
-			var undoInfo = getUndo();
-			region.path.smooth();
-			saveUndo(undoInfo);
-		}
-		paper.view.draw();
-	}
-
-}
+//function clickHandler(event){
+//	if( debug ) console.log("> clickHandler");
+//
+//	event.stopHandlers = !navEnabled;
+//	if( selectedTool == "draw" ) {
+//		checkRegionSize(region);
+//	}
+//}
+//
+//function pressHandler(event){
+//	if( debug ) console.log("> pressHandler");
+//
+//	if( !navEnabled ) {
+//		event.stopHandlers = true;
+//		mouseDown(event.originalEvent.layerX,event.originalEvent.layerY);
+//	}
+//}
+//
+//function dragHandler(event){
+//	if( debug > 1 )
+//	console.log("> dragHandler");
+//
+//	if( !navEnabled ) {
+//		event.stopHandlers = true;
+//		mouseDrag(event.originalEvent.layerX,event.originalEvent.layerY,event.delta.x,event.delta.y);
+//	}
+//}
+//
+//function dragEndHandler(event){
+//	if( debug ) console.log("> dragEndHandler");
+//
+//	if( !navEnabled ) {
+//		event.stopHandlers = true;
+//		mouseUp();
+//	}
+//}
+//
+//function singlePressOnRegion(event) {
+//	if( debug ) console.log("> singlePressOnRegion");
+//
+//	event.stopPropagation();
+//	event.preventDefault();
+//
+//	var el = $(this);
+//	var uid;
+//	var reg;
+//
+//	if( debug ) console.log(event);
+//	if( event.clientX > 20 ) {
+//		if( event.clientX > 50 ) {
+//
+//			if( el.hasClass("ontology") ) {
+//				// Click on regionPicker (ontology selection list)
+//				var newName = el.find(".region-name").text();
+//				uid = $(".region-tag.selected").attr('id');
+//				reg = findRegionByUID(uid);
+//				changeRegionName(reg,newName);
+//				$("div#regionPicker").appendTo($("body")).hide();
+//			}
+//			else {
+//				// Click on regionList (list or annotated regions)
+//				uid = $(this).attr('id');
+//				reg = findRegionByUID(uid);
+//				if( reg ) {
+//					selectRegion(reg);
+//				}
+//				else
+//				console.log("region undefined");
+//			}
+//		}
+//		else {
+//			var reg = findRegionByUID(this.id);
+//			if( reg.path.fillColor != null ) {
+//				if( reg ) {
+//					selectRegion(reg);
+//				}
+//				annotationStyle(reg);
+//			}
+//		}
+//	}
+//	else {
+//		var reg = findRegionByUID(this.id);
+//		toggleRegion(reg);
+//	}
+//}
+//
+//function doublePressOnRegion(event) {
+//	if( debug ) console.log("> doublePressOnRegion");
+//
+//	event.stopPropagation();
+//	event.preventDefault();
+//
+//	if( event.clientX > 20 ) {
+//		if( event.clientX > 50 ) {
+//			if( config.drawingEnabled ) {
+//				if( config.regionOntology == true ) {
+//					regionPicker(this);
+//				}
+//				else {
+//					var name = prompt("Region name", findRegionByUID(this.id).name);
+//					if( name != null ) {
+//						changeRegionName(findRegionByUID(this.id), name);
+//					}
+//				}
+//			}
+//		}
+//		else {
+//			var reg = findRegionByUID(this.id);
+//			if( reg.path.fillColor != null ) {
+//				if( reg ) {
+//					selectRegion(reg);
+//				}
+//				annotationStyle(reg);
+//			}
+//		}
+//	}
+//	else {
+//		var reg = findRegionByUID(this.id);
+//		toggleRegion(reg);
+//	}
+//}
+//
+//var tap = false
+//function handleRegionTap(event) {
+//	/*
+//	Handles single and double tap in touch devices
+//	*/
+//	if( debug ) console.log("> handleRegionTap");
+//
+//	var caller = this;
+//
+//	if( !tap ){ //if tap is not set, set up single tap
+//		tap = setTimeout(function() {
+//			tap = null
+//		},300);
+//
+//		// call singlePressOnRegion(event) using 'this' as context
+//		singlePressOnRegion.call(this,event);
+//	} else {
+//		clearTimeout(tap);
+//		tap = null;
+//
+//		// call doublePressOnRegion(event) using 'this' as context
+//		doublePressOnRegion.call(this,event);
+//	}
+//	if( debug ) console.log("< handleRegionTap");
+//}
+//
+//function mouseDown(x,y) {
+//	if( debug > 1 ) console.log("> mouseDown");
+//
+//	mouseUndo = getUndo();
+//	var prevRegion = null;
+//	var point = paper.view.viewToProject(new paper.Point(x,y));
+//
+//	handle = null;
+//
+//	switch( selectedTool ) {
+//		case "select":
+//		case "addpoint":
+//		case "delpoint":
+//		case "addregion":
+//		case "delregion":
+//		case "splitregion": {
+//			var hitResult = paper.project.hitTest(point, {
+//				tolerance: 10,
+//				stroke: true,
+//				segments: true,
+//				fill: true,
+//				handles: true
+//			});
+//
+//			newRegionFlag = false;
+//			if( hitResult ) {
+//				var i;
+//				for( i = 0; i < ImageInfo[currentImage]["Regions"].length; i++ ) {
+//					if( ImageInfo[currentImage]["Regions"][i].path == hitResult.item ) {
+//						re = ImageInfo[currentImage]["Regions"][i];
+//						break;
+//					}
+//				}
+//
+//				// select path
+//				if( region && region != re ) {
+//					region.path.selected = false;
+//					prevRegion = region;
+//				}
+//				selectRegion(re);
+//
+//				if( hitResult.type == 'handle-in' ) {
+//					handle = hitResult.segment.handleIn;
+//					handle.point = point;
+//				}
+//				else if( hitResult.type == 'handle-out' ) {
+//					handle = hitResult.segment.handleOut;
+//					handle.point = point;
+//				}
+//				else if( hitResult.type == 'segment' ) {
+//					if( selectedTool == "select" ) {
+//						handle = hitResult.segment.point;
+//						handle.point = point;
+//					}
+//					if( selectedTool == "delpoint" ) {
+//						hitResult.segment.remove();
+//						commitMouseUndo();
+//					}
+//				}
+//				else if( hitResult.type == 'stroke' && selectedTool == "addpoint" ) {
+//					region.path
+//					.curves[hitResult.location.index]
+//					.divide(hitResult.location);
+//					region.path.fullySelected = true;
+//					commitMouseUndo();
+//					paper.view.draw();
+//				}
+//				else if( selectedTool == "addregion" ) {
+//					if( prevRegion ) {
+//						var newPath = region.path.unite(prevRegion.path);
+//						removeRegion(prevRegion);
+//						region.path.remove();
+//						region.path = newPath;
+//						updateRegionList();
+//						selectRegion(region);
+//						paper.view.draw();
+//						commitMouseUndo();
+//						backToSelect();
+//					}
+//				}
+//				else if( selectedTool == "delregion" ) {
+//					if( prevRegion ) {
+//						var newPath = prevRegion.path.subtract(region.path);
+//						removeRegion(prevRegion);
+//						prevRegion.path.remove();
+//						newRegion({path:newPath});
+//						updateRegionList();
+//						selectRegion(region);
+//						paper.view.draw();
+//						commitMouseUndo();
+//						backToSelect();
+//					}
+//				}
+//				else if( selectedTool == "splitregion" ) {
+//					/*selected region is prevRegion!
+//					region is the region that should be split based on prevRegion
+//					newRegionPath is outlining that part of region which has not been overlaid by prevRegion
+//					i.e. newRegion is what was region
+//					and prevRegion color should go to the other part*/
+//					if( prevRegion ) {
+//						var prevColor = prevRegion.path.fillColor;
+//						//color of the overlaid part
+//						var color = region.path.fillColor;
+//						var newPath = region.path.divide(prevRegion.path);
+//
+//						removeRegion(prevRegion);
+//						region.path.remove();
+//
+//						region.path = newPath;
+//						var newReg;
+//						for( i = 0; i < newPath._children.length; i++ )
+//						{
+//							if( i == 0 ) {
+//								region.path = newPath._children[i];
+//							}
+//							else {
+//								newReg = newRegion({path:newPath._children[i]});
+//							}
+//						}
+//						region.path.fillColor = color;
+//						if( newReg ) {
+//							newReg.path.fillColor = prevColor;
+//						}
+//						updateRegionList();
+//						selectRegion(region);
+//						paper.view.draw();
+//
+//						commitMouseUndo();
+//						backToSelect();
+//					}
+//				}
+//				break;
+//			}
+//			if( hitResult == null && region ) {
+//				//deselect paths
+//				region.path.selected = false;
+//				region = null;
+//			}
+//			break;
+//		}
+//		case "draw": {
+//			// Start a new region
+//			// if there was an older region selected, unselect it
+//			if( region ) {
+//				region.path.selected = false;
+//			}
+//			// start a new region
+//			var path = new paper.Path({segments:[point]})
+//			path.strokeWidth = config.defaultStrokeWidth;
+//			region = newRegion({path:path});
+//			// signal that a new region has been created for drawing
+//			newRegionFlag = true;
+//
+//			commitMouseUndo();
+//			break;
+//		}
+//		case "draw-polygon": {
+//			// is already drawing a polygon or not?
+//			if( drawingPolygonFlag == false ) {
+//				// deselect previously selected region
+//				if( region )
+//				region.path.selected = false;
+//
+//				// Start a new Region with alpha 0
+//				var path = new paper.Path({segments:[point]})
+//				path.strokeWidth = config.defaultStrokeWidth;
+//				region = newRegion({path:path});
+//				region.path.fillColor.alpha = 0;
+//				region.path.selected = true;
+//				drawingPolygonFlag = true;
+//				commitMouseUndo();
+//			} else {
+//				var hitResult = paper.project.hitTest(point, {tolerance:10, segments:true});
+//				if( hitResult && hitResult.item == region.path && hitResult.segment.point == region.path.segments[0].point ) {
+//					// clicked on first point of current path
+//					// --> close path and remove drawing flag
+//					finishDrawingPolygon(true);
+//				} else {
+//					// add point to region
+//					region.path.add(point);
+//					commitMouseUndo();
+//				}
+//			}
+//			break;
+//		}
+//		case "rotate":
+//		region.origin = point;
+//		break;
+//	}
+//	paper.view.draw();
+//}
+//
+//function mouseDrag(x,y,dx,dy) {
+//	//if( debug ) console.log("> mouseDrag");
+//
+//	// transform screen coordinate into world coordinate
+//	var point = paper.view.viewToProject(new paper.Point(x,y));
+//
+//	// transform screen delta into world delta
+//	var orig = paper.view.viewToProject(new paper.Point(0,0));
+//	var dpoint = paper.view.viewToProject(new paper.Point(dx,dy));
+//	dpoint.x -= orig.x;
+//	dpoint.y -= orig.y;
+//
+//	if( handle ) {
+//		handle.x += point.x-handle.point.x;
+//		handle.y += point.y-handle.point.y;
+//		handle.point = point;
+//		commitMouseUndo();
+//	} else
+//	if( selectedTool == "draw" ) {
+//		region.path.add(point);
+//	} else
+//	if( selectedTool == "select" ) {
+//		// event.stopHandlers = true;
+//		for( i in ImageInfo[currentImage]["Regions"] ) {
+//			var reg = ImageInfo[currentImage]["Regions"][i];
+//			if( reg.path.selected ) {
+//				reg.path.position.x += dpoint.x;
+//				reg.path.position.y += dpoint.y;
+//				commitMouseUndo();
+//			}
+//		}
+//	}
+//	if( selectedTool == "rotate" ) {
+//		event.stopHandlers = true;
+//		var degree = parseInt(dpoint.x);
+//		var i;
+//		for( i in ImageInfo[currentImage]["Regions"] ) {
+//			if( ImageInfo[currentImage]["Regions"][i].path.selected ) {
+//				ImageInfo[currentImage]["Regions"][i].path.rotate(degree, region.origin);
+//				commitMouseUndo();
+//			}
+//		}
+//	}
+//	paper.view.draw();
+//}
+//
+//function mouseUp() {
+//	if( debug ) console.log("> mouseUp");
+//
+//	if( newRegionFlag == true ) {
+//		region.path.closed = true;
+//		region.path.fullySelected = true;
+//		// to delete all unnecessary segments while preserving the form of the region to make it modifiable; & adding handles to the segments
+//		var orig_segments = region.path.segments.length;
+//		region.path.simplify(0);
+//		var final_segments = region.path.segments.length;
+//		if( debug > 2 ) console.log( parseInt(final_segments/orig_segments*100) + "% segments conserved" );
+//	}
+//	paper.view.draw();
+//}
+//
+///*** simplify the region path
+//***/
+//function simplify() {
+//	if( region !== null ) {
+//		if( debug ) console.log("> simplifying region path");
+//
+//		var orig_segments = region.path.segments.length;
+//		region.path.simplify();
+//		var final_segments = region.path.segments.length;
+//		console.log( parseInt(final_segments/orig_segments*100) + "% segments conserved" );
+//		paper.view.draw();
+//	}
+//}
+//
+///*** flip region along y-axis around its center point
+//***/
+//function flipRegion(reg) {
+//	if( region !== null ) {
+//		if( debug ) console.log("> flipping region");
+//
+//		var i;
+//		for( i in ImageInfo[currentImage]["Regions"] ) {
+//			if( ImageInfo[currentImage]["Regions"][i].path.selected ) {
+//				ImageInfo[currentImage]["Regions"][i].path.scale(-1, 1);
+//			}
+//		}
+//		paper.view.draw();
+//	}
+//}
+//
+//function toggleHandles() {
+//	console.log("> toggleHandles");
+//	if (region != null) {
+//		if (region.path.hasHandles()) {
+//			if (confirm('Do you really want to remove the handles?')) {
+//				var undoInfo = getUndo();
+//				region.path.clearHandles();
+//				saveUndo(undoInfo);
+//			}
+//		}
+//		else {
+//			var undoInfo = getUndo();
+//			region.path.smooth();
+//			saveUndo(undoInfo);
+//		}
+//		paper.view.draw();
+//	}
+//
+//}
 
 /***
 the following functions serve changing the annotation style
@@ -2046,12 +2046,12 @@ function initMicrodraw2(obj) {
 	viewer.addHandler("page", function (data) {
 		console.log(data.page,params.tileSources[data.page]);
 	});
-	viewer.addViewerInputHook({hooks: [
-		{tracker: 'viewer', handler: 'clickHandler', hookHandler: clickHandler},
-		{tracker: 'viewer', handler: 'pressHandler', hookHandler: pressHandler},
-		{tracker: 'viewer', handler: 'dragHandler', hookHandler: dragHandler},
-		{tracker: 'viewer', handler: 'dragEndHandler', hookHandler: dragEndHandler}
-	]});
+//	viewer.addViewerInputHook({hooks: [
+//		{tracker: 'viewer', handler: 'clickHandler', hookHandler: clickHandler},
+//		{tracker: 'viewer', handler: 'pressHandler', hookHandler: pressHandler},
+//		{tracker: 'viewer', handler: 'dragHandler', hookHandler: dragHandler},
+//		{tracker: 'viewer', handler: 'dragEndHandler', hookHandler: dragEndHandler}
+//	]});
 
 	if( debug ) console.log("< initMicrodraw2 resolve: success");
 }
@@ -2106,3 +2106,428 @@ microdrawDBLoad();
 // indent-tabs-mode: t
 // tab-width: 4
 // End:
+
+
+
+
+
+
+// Click handlers
+  // add handlers: update slice name, animation, page change, mouse actions
+  viewer.addHandler('open',function(){
+    initAnnotationOverlay();
+  });
+
+  viewer.addHandler('animation', function(event){
+    transform();
+  });
+
+  viewer.addViewerInputHook({hooks: [
+    {tracker: 'viewer', handler: 'clickHandler', hookHandler: clickHandler},
+    {tracker: 'viewer', handler: 'dragHandler', hookHandler: dragHandler},
+    {tracker: 'viewer', handler: 'dragEndHandler', hookHandler: dragEndHandler},
+    {tracker: 'viewer', handler: 'dblClickHandler', hookHandler: dblClickHandler}
+    //{tracker: 'viewer', handler: 'moveHandler', hookHandler: moveHandler}, //moveHandler
+  ]});
+  var imagingHelper = viewer.activateImagingHelper({});
+  /***2
+  Interaction: mouse and tap
+  */
+  function clickHandler(event){
+    if( debug ) console.log("> pressHandler");
+    event.stopHandlers = true;
+    onMouseDown(event.originalEvent.layerX,event.originalEvent.layerY);
+  }
+
+  function moveHandler(event)
+  {
+    event.stopHandlers=true;
+    onMouseMove(event.originalEvent.layerX,event.originalEvent.layerY);
+  }
+
+  function dragHandler(event){
+    if( debug) console.log("> dragHandler");
+    event.stopHandlers = true;
+    onMouseDrag(event.originalEvent.layerX,event.originalEvent.layerY,event.delta.x,event.delta.y);
+  }
+
+  function dragEndHandler(event){
+    if( debug ) console.log("> dragEndHandler");
+    event.stopHandlers = true;
+    onMouseUp();
+  }
+
+  function singlePressOnRegion(event) {
+    if( debug ) console.log("> singlePressOnRegion");
+    event.stopPropagation();
+    event.preventDefault();
+    // Not sure about this at the moment
+  }
+
+  function dblClickHandler(event){
+    if (debug) console.log(">doubleClickHandler");
+    event.stopHandlers=true;
+    onDoubleClick(event.originalEvent.layerX,event.originalEvent.layerY);
+  }
+
+  function doublePressOnRegion(event) {
+    if( debug ) console.log("> doublePressOnRegion");
+
+    event.stopPropagation();
+    event.preventDefault();
+
+    // if found double pressed on region delete it
+  }
+
+  function getPos(e) {
+    // The canvas-click event gives us a position in web coordinates.
+    var webPoint = e.position;
+
+    // Convert that to viewport coordinates, the lingua franca of OpenSeadragon coordinates.
+    var viewportPoint = viewer.viewport.pointFromPixel(webPoint);
+
+    var imageportPoint= viewer.viewport.viewportToImageCoordinates(viewportPoint);
+
+    return {x: imageportPoint.x , y: imageportPoint.y}
+  }
+
+ /*
+  HIT TEST AND ITS RESULTING EFFECTS
+  */
+  var hitOptions = {
+    points: true,
+    stroke: true,
+    fill: true,
+    tolerance: 2
+  };
+
+  var segmentArray = [];
+  var segment, path;
+  var movePath = false;
+  var dragging = false;
+  var editMode = false;
+  var handle;
+  var dragMode = false;
+  var addMode=false;
+  var addPoints=null;
+  var hitResultId= null;
+  var path1 = new paper.Path();
+  var path2 = new paper.Path();
+  var path3 = new paper.Path();
+  var segmentStartIndex = null;
+  var segmentsEndIndex = null;
+  var selectedRect=null;
+  var segmentLonger;
+  var segmentShorter;
+  var hitResult;
+  var pathArc;
+  var mouseUpCurve;
+  var path_temp;
+  var dragDone = false;
+  function onMouseDown(x,y) {
+    // x,y means where your mouse hit on the screen
+    if (dragMode) {
+      if (pathArc != null) {
+            pathArc.removeSegments();
+            pathArc = null;
+      }if (path_temp != null) {
+            path_temp.removeSegments();
+            path_temp = null;
+      }
+      startOver(); // when drag, start everything from here
+      return;
+    }
+
+    if(addMode){
+      pts.push(x,y);
+      if(pts.length>=8){
+        if(circle!=null){
+        //draw the curve and remove the circle
+          circle.remove();
+          circle=null;
+        }
+        addMode=false;
+        path = new paper.Path();
+        path.closed = true;
+        var lightness = (Math.random() - 0.5) * 0.4 + 0.4;
+        var hue = Math.random() * 360;
+        path.fillColor = { hue: hue, saturation: 1, lightness: lightness };
+        path.strokeColor = 'green';
+        for(var i=0; i < pts.length; i += 2) {
+            point = paper.view.viewToProject(new paper.Point(pts[i],pts[i+1]));
+            path.add(point);
+        }
+        path.smooth();
+        path.flatten(0.001);
+        pts=[];
+      }
+    }else{
+      var pnt=paper.view.viewToProject(new paper.Point(x,y));
+      hitResult = project.hitTest(pnt, hitOptions);
+
+      // check whether or not to continue
+      if (hitResult == null) {
+        startOver();
+        return; //break if click on outside
+      }else if (hitResultId == null) {
+          hitResultId = hitResult.item.id;
+      }else if(hitResultId != hitResult.item.id){
+        startOver();
+        return; //break if click on differnt contour
+     }
+      //end
+
+      // find closest point in contour
+      var minlDistance = 2000
+      var bestPoint = {
+        x: 0,
+        y: 0
+      }
+      var index;
+      for( i = 0; i < hitResult.item.segments.length; i++){
+        if( Math.abs(hitResult.item.segments[i].point.x - pnt.x) +
+            Math.abs(hitResult.item.segments[i].point.y - pnt.y) <
+            minlDistance
+          )
+        {
+          minlDistance = Math.abs(hitResult.item.segments[i].point.x - pnt.x) +
+                         Math.abs(hitResult.item.segments[i].point.y - pnt.y);
+          bestPoint.x = hitResult.item.segments[i].point.x;
+          bestPoint.y = hitResult.item.segments[i].point.y;
+          index = i;
+        };
+      };
+      //end
+
+      // find segment index
+      if(segmentStartIndex == null){
+         segmentStartIndex = index;
+      }
+      else if (segmentsEndIndex == null) {
+         segmentsEndIndex = index;
+      }
+
+      // draw two rectangulars on the closest point, control three-times-most click event
+      if(path1  == null){
+        var size = new Size(5, 5);
+        var point = new Point(bestPoint.x - 2.5, bestPoint.y - 2.5);
+        path1 = new Path.Rectangle(point, size);
+        path1.fillColor = 'blue';
+        // path1.strokeColor = 'green';
+      }else if (path2 == null) {
+        var size = new Size(5, 5);
+        var point = new Point(bestPoint.x - 2.5, bestPoint.y - 2.5);
+        path2 = new Path.Rectangle(point, size);
+        path2.fillColor = 'blue'
+        // path2.strokeColor = 'red';
+      }
+      //end
+
+      // after two clicks, find middle point and mark it out, seperate into two parts
+      var midPointIndex;
+      if (segmentStartIndex != null && segmentsEndIndex != null) {
+        var segPath1 = new paper.Path();
+        segPath1.strokeColor = 'green';
+        segPath1.smooth({ type: 'continuous' });
+        var segPath2 = new paper.Path();
+        segPath2.strokeColor = 'green';
+        segPath2.smooth({ type: 'continuous' });
+        getMiddlePoint(segmentStartIndex, segmentsEndIndex, segPath1, segPath2);
+        if (segPath1.length > segPath2.length) {
+             for (var i = 0; i < segPath1.segments.length; i++)
+             {
+               var point = new Point(segPath1.segments[i].point.x,segPath1.segments[i].point.y);
+               segmentArray.push(point);
+             }
+             midPointIndex = Math.round(segPath2.segments.length/2);
+             var size = new Size(5, 5);
+             var midPoint = new Point(segPath2.segments[midPointIndex].point.x - 2.5,
+                                      segPath2.segments[midPointIndex].point.y - 2.5);
+             path3 = new Path.Rectangle(midPoint, size);
+            //  path3.strokeColor = 'purple';
+             path3.fillColor = 'red';
+             dragMode = true;
+             pathArc = segPath2;
+             path_temp = segPath1;
+        }else {
+              for (var i = 0; i < segPath2.segments.length; i++)
+              {
+                var point = new Point(segPath2.segments[i].point.x, segPath2.segments[i].point.y);
+                segmentArray.push(point);
+              }
+              midPointIndex = Math.round(segPath1.segments.length/2);
+              var size = new Size(5, 5);
+              var midPoint = new Point(segPath1.segments[midPointIndex].point.x - 2.5,
+                                       segPath1.segments[midPointIndex].point.y - 2.5);
+              path3 = new Path.Rectangle(midPoint, size);
+              // path3.strokeColor = 'purple';
+              path3.fillColor = 'red';
+              dragMode = true;
+              pathArc = segPath1;
+              path_temp = segPath2;
+        }
+      }
+    }
+  }
+
+  function startOver(){
+    if (path1 != null) {
+      path1.removeSegments();
+      path1 = null;
+    }
+    if (path2 != null) {
+      path2.removeSegments();
+      path2 = null;
+    }
+    if (path3 != null) {
+      path3.removeSegments();
+      path3 = null;
+    }
+    hitResultId = null;
+    segmentStartIndex = null;
+    segmentsEndIndex = null;
+    segmentArray = [];
+    dragMode = false;
+    dragDone = false;
+  }
+
+  function getMiddlePoint(segmentStartIndex, segmentsEndIndex, segPath1, segPath2){
+    if (segmentStartIndex < segmentsEndIndex) {
+        var countStart = segmentStartIndex;
+        var countEnd = segmentsEndIndex;
+        while(countStart <= countEnd){
+          segPath1.add(hitResult.item.segments[countStart].point.x,
+                       hitResult.item.segments[countStart].point.y);
+          countStart++;
+        }
+        segPath1.add(hitResult.item.segments[countEnd].point.x,
+                     hitResult.item.segments[countEnd].point.y);
+        countStart = segmentsEndIndex;
+        countEnd = segmentStartIndex;
+        while (countStart != countEnd) {
+          segPath2.add(hitResult.item.segments[countStart].point.x,
+                       hitResult.item.segments[countStart].point.y);
+          countStart++;
+          if (countStart >= hitResult.item.segments.length) {
+                countStart = 0;
+          }
+        }
+    }else {
+        var countStart = segmentsEndIndex;
+        var countEnd = segmentStartIndex;
+        while(countStart <= countEnd){
+          segPath1.add(hitResult.item.segments[countStart].point.x,
+                       hitResult.item.segments[countStart].point.y);
+          countStart++;
+        }
+        segPath1.add(hitResult.item.segments[countEnd].point.x,
+                     hitResult.item.segments[countEnd].point.y);
+
+        countStart = segmentStartIndex;
+        countEnd = segmentsEndIndex;
+        while (countStart != countEnd) {
+          segPath2.add(hitResult.item.segments[countStart].point.x,
+                       hitResult.item.segments[countStart].point.y);
+          countStart++;
+          if (countStart >= hitResult.item.segments.length) {
+                countStart = 0;
+          }
+        }
+    }
+  }
+
+  function onMouseUp()
+  {
+    if (dragDone == true) {
+      // find a way to add every thing on the contour
+      // console.log(segmentArray);
+
+      var long = segmentArray.length;
+      pathArc.flatten(0.001);
+      // pathArc.flatten();
+      // alert(pathArc.segments.length);
+      if (
+          Math.abs(segmentArray[long - 1].x - pathArc.segments[pathArc.segments.length - 1].point.x) +
+          Math.abs(segmentArray[long - 1].y - pathArc.segments[pathArc.segments.length - 1].point.y) >
+          Math.abs(segmentArray[long - 1].x - pathArc.segments[0].point.x) +
+          Math.abs(segmentArray[long - 1].y - pathArc.segments[0].point.y)
+      )
+      {
+        for (var i = 0; i < pathArc.segments.length; i++) {
+          segmentArray.push(new Point(pathArc.segments[i].point.x, pathArc.segments[i].point.y));
+        }
+      }else {
+        for (var i = 0; i < pathArc.segments.length; i++) {
+          segmentArray.push(new Point(pathArc.segments[pathArc.segments.length - 1 - i].point.x, pathArc.segments[pathArc.segments.length - 1 - i].point.y));
+        }
+      }
+      pathArc.removeSegments();
+      path_temp.removeSegments();
+      pathArc = null;
+      path_temp = null;
+      var newLine = new Path({
+          segments: segmentArray,
+          strokeColor : 'green'
+      });
+      newLine.smooth({ type: 'continuous' });
+      newLine.closed = true;
+      newLine.fillColor = 'purple';
+      console.log("twice click stll draw things here"); // it works only after drag
+    }else {
+      // twice click should not draw anything on graph
+    }
+    segmentArray = [];
+    if( debug ) console.log("> mouseUp");
+    if(path!=null) path.fullySelected = false;
+    if(editMode) editMode = false;
+  }
+
+  function onMouseDrag(x,y,dx,dy) {
+      if(path3)
+      {
+          hitResult.item.removeSegments();
+          var dpoint = paper.view.viewToProject(new paper.Point(x,y));
+          originX = dpoint.x;
+          originY = dpoint.y;
+          var point = new Point(originX -2.5, originY - 2.5);
+          var size = new Size(5,5);
+          // dynamic change path3 Rectangle
+          path3.removeSegments();
+          path3 = new paper.Path.Rectangle(point,size);
+          path3.strokeColor = 'purple';
+          path3.fillColor = 'purple';
+          var point1 = new Point(path1.segments[0].point.x, path1.segments[0].point.y);
+          var point2 = new Point(path2.segments[0].point.x, path2.segments[0].point.y);
+          // dynamic draw shorter segment after drag
+          pathArc.removeSegments();
+          pathArc = new paper.Path();
+          pathArc.strokeColor = 'green';
+          pathArc.add(new Point(point1.x + 2.5, point1.y -2.5));
+          pathArc.add(new Point(point.x, point.y));
+          pathArc.add(new Point(point2.x + 2.5, point2.y - 2.5));
+          pathArc.smooth({ type: 'continuous' });
+          pathArc.closed = false;
+          dragDone = true;
+      }else {
+          startOver();
+      }
+  }
+
+  var circle=null;
+  function onDoubleClick(x,y)
+  {
+    path=null;
+    var pnt=paper.view.viewToProject(new paper.Point(x,y));
+    var hitResult = project.hitTest(pnt, hitOptions);
+
+    if (hitResult) {
+      if(debug)console.log("Item Selected:"+hitResult.type);
+      path = hitResult.item;
+      path.remove();
+    }else{
+      radius=5;
+      circle = new Path.Circle(pnt, radius);
+      circle.strokeColor = 'green';
+      addMode=true;
+    }
+  }

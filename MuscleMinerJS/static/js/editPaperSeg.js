@@ -213,6 +213,9 @@
     // Draw the view now:
 
     $.each(contours.contours, function(index, element) {
+        if(index != 0){
+            return;
+        }
       path = new paper.Path();
       path.closed = true;
       var lightness = (Math.random() - 0.5) * 0.4 + 0.4;
