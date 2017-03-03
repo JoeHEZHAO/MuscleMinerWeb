@@ -11,6 +11,7 @@
 
 //(function() {                 // force everything local.
 paper.install(window);          // sets Paper objects and classes of 'window' to the global scope
+var w, h,isDown = false, pIndex = -1, pts = [];
 var debug = 1;                  // whether or not to print debug messages
 var localhost='';               // relative path to localhost
 var dbroot = "http://"+localhost+"/php/microdraw_db.php";
