@@ -82,10 +82,9 @@
     paper.view.zoom=(sw * z) / magicV;
   }
 
-    var myInterval;
-    var counter=0;
-    var running;
-    
+var myInterval;
+var counter=0;
+var running;
   $(document).submit(function(e){
     var form = jQuery(e.target);
     if(form.is("#frmsegment")){ // check if this is the form that you want (delete this check to apply this to all forms)
@@ -134,7 +133,6 @@
     {tracker: 'viewer', handler: 'dblClickHandler', hookHandler: dblClickHandler}
     //{tracker: 'viewer', handler: 'moveHandler', hookHandler: moveHandler}, //moveHandler
   ]});
-    
   var imagingHelper = viewer.activateImagingHelper({});
   /***2
   Interaction: mouse and tap
@@ -214,9 +212,6 @@
     // Draw the view now:
 
     $.each(contours.contours, function(index, element) {
-        if(index != 0){
-            return;
-        }
       path = new paper.Path();
       path.closed = true;
       var lightness = (Math.random() - 0.5) * 0.4 + 0.4;
