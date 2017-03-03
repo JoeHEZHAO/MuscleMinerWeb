@@ -101,15 +101,35 @@
 </div>
 
 <!-- Load javascript -->
+<script src="../static/js/paper-full.min.js"></script>
 <script src="../static/js/jquery-2.2.3.js"></script>
 <script src="../static/js/openseadragon/openseadragon.min.js"></script>
 <script src="../static/js/openseadragon-viewerinputhook.min.js"></script>
 <script src="../static/js/OpenSeadragonScalebar/openseadragon-scalebar.js"></script>
 <script src="../static/js/openseadragon-imaginghelper.min.js"></script>
 <script src="../static/js/loadingoverlay.min.js"></script>
-<script src="../static/js/paper-full.min.js"></script>
 <script src="../static/js/neurolex-ontology.js"></script>
 <script src="../static/js/edit.js"></script>
+<script type="text/javascript">
+
+   var  viewer = OpenSeadragon({
+		id: "openseadragon1",
+		prefixUrl: "../static/js/openseadragon/images/",
+		tileSources: [],
+		showReferenceStrip: false,
+		referenceStripSizeRatio: 0.2,
+		showNavigator: true,
+		sequenceMode: false,
+		navigatorId:"myNavigator",
+		zoomInButton:"zoom-in",
+		zoomOutButton:"zoom-out",
+		homeButton:"home",
+		preserveViewport: true
+	});
+    
+</script>
+
+    
 <!--
 <script src="../static/js/recordstop.js"></script>
 <script src="../static/js/musclerecord.js"></script>

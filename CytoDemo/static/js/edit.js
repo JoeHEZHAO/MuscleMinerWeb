@@ -10,8 +10,10 @@
 */
 
 //(function() {                 // force everything local.
-var debug = 1;
-var localhost='';
+paper.install(window);          // sets Paper objects and classes of 'window' to the global scope
+var w, h,isDown = false, pIndex = -1, pts = [];
+var debug = 1;                  // whether or not to print debug messages
+var localhost='';               // relative path to localhost
 var dbroot = "http://"+localhost+"/php/microdraw_db.php";
 var ImageInfo = {};             // regions, and projectID (for the paper.js canvas) for each slices, can be accessed by the slice name. (e.g. ImageInfo[imageOrder[viewer.current_page()]])
 // regions contain a paper.js path, a unique ID and a name
@@ -22,7 +24,7 @@ var region = null;	            // currently selected region (one element of Regi
 var copyRegion;		            // clone of the currently selected region for copy/paste
 var handle;			            // currently selected control point or handle (if any)
 var selectedTool;	            // currently selected tool
-var viewer;			            // open seadragon viewer
+//var viewer;			            // open seadragon viewer
 var navEnabled = true;          // flag indicating whether the navigator is enabled (if it's not, the annotation tools are)
 var magicV = 1000;	            // resolution of the annotation canvas - is changed automatically to reflect the size of the tileSource
 var myOrigin = {};	            // Origin identification for DB storage
@@ -296,7 +298,7 @@ function appendRegionTagsFromOntology(o) {
 			// handle double click on computers
 			el.dblclick(doublePressOnRegion);
 
-			el.on("touchstart",handleRegionTap);
+//			el.on("touchstart",handleRegionTap);
 		}
 	}
 }
@@ -1550,15 +1552,15 @@ function loadPreviousImage() {
 }
 
 
-function resizeAnnotationOverlay() {
-	if( debug ) console.log("> resizeAnnotationOverlay");
-
-	var width = $("body").width();
-	var height = $("body").height();
-	$("canvas.overlay").width(width);
-	$("canvas.overlay").height(height);
-	paper.view.viewSize = [width,height];
-}
+//function resizeAnnotationOverlay() {
+//	if( debug ) console.log("> resizeAnnotationOverlay");
+//
+//	var width = $("body").width();
+//	var height = $("body").height();
+//	$("canvas.overlay").width(width);
+//	$("canvas.overlay").height(height);
+//	paper.view.viewSize = [width,height];
+//}
 
 //function initAnnotationOverlay(data) {
 //	if( debug ) console.log("> initAnnotationOverlay");
@@ -2030,12 +2032,12 @@ function initMicrodraw() {
 		});
 	}
 
-	$(window).resize(function() {
-		$("#regionList").height($(window).height() - $("#regionList").offset().top);
-		resizeAnnotationOverlay();
-	});
+//	$(window).resize(function() {
+//		$("#regionList").height($(window).height() - $("#regionList").offset().top);
+//		resizeAnnotationOverlay();
+//	});
 
-	appendRegionTagsFromOntology(Ontology);
+//	appendRegionTagsFromOntology(Ontology);
 
 	return def.promise();
 }
@@ -2051,15 +2053,15 @@ function initMicrodraw2(obj) {
 	}
 
 	// set default values for new regions (general configuration)
-	if (config.defaultStrokeColor == undefined) config.defaultStrokeColor = 'black';
-	if (config.defaultStrokeWidth == undefined) config.defaultStrokeWidth = 1;
-	if (config.defaultFillAlpha == undefined) config.defaultFillAlpha = 0.5;
-	// set default values for new regions (per-brain configuration)
-	if (obj.configuration) {
-		if (obj.configuration.defaultStrokeColor != undefined) config.defaultStrokeColor = obj.configuration.defaultStrokeColor;
-		if (obj.configuration.defaultStrokeWidth != undefined) config.defaultStrokeWidth = obj.configuration.defaultStrokeWidth;
-		if (obj.configuration.defaultFillAlpha != undefined) config.defaultFillAlpha = obj.configuration.defaultFillAlpha;
-	}
+//	if (config.defaultStrokeColor == undefined) config.defaultStrokeColor = 'black';
+//	if (config.defaultStrokeWidth == undefined) config.defaultStrokeWidth = 1;
+//	if (config.defaultFillAlpha == undefined) config.defaultFillAlpha = 0.5;
+//	// set default values for new regions (per-brain configuration)
+//	if (obj.configuration) {
+//		if (obj.configuration.defaultStrokeColor != undefined) config.defaultStrokeColor = obj.configuration.defaultStrokeColor;
+//		if (obj.configuration.defaultStrokeWidth != undefined) config.defaultStrokeWidth = obj.configuration.defaultStrokeWidth;
+//		if (obj.configuration.defaultFillAlpha != undefined) config.defaultFillAlpha = obj.configuration.defaultFillAlpha;
+//	}
 
 	// init slider that can be used to change between slides
 
@@ -2070,20 +2072,20 @@ function initMicrodraw2(obj) {
 	currentImage = imageOrder[start_slice];
 
 	params.tileSources = obj.tileSources;
-	viewer = OpenSeadragon({
-		id: "openseadragon1",
-		prefixUrl: "../static/js/openseadragon/images/",
-		tileSources: [],
-		showReferenceStrip: false,
-		referenceStripSizeRatio: 0.2,
-		showNavigator: true,
-		sequenceMode: false,
-		navigatorId:"myNavigator",
-		zoomInButton:"zoom-in",
-		zoomOutButton:"zoom-out",
-		homeButton:"home",
-		preserveViewport: true
-	});
+//	viewer = OpenSeadragon({
+//		id: "openseadragon1",
+//		prefixUrl: "../static/js/openseadragon/images/",
+//		tileSources: [],
+//		showReferenceStrip: false,
+//		referenceStripSizeRatio: 0.2,
+//		showNavigator: true,
+//		sequenceMode: false,
+//		navigatorId:"myNavigator",
+//		zoomInButton:"zoom-in",
+//		zoomOutButton:"zoom-out",
+//		homeButton:"home",
+//		preserveViewport: true
+//	});
 
   imagingHelper = viewer.activateImagingHelper({});
 
@@ -2114,22 +2116,38 @@ function initMicrodraw2(obj) {
 	});
 
 	// add handlers: update slice name, animation, page change, mouse actions
-	viewer.addHandler('open',function(){
-		initAnnotationOverlay();
-		updateSliceName();
-	});
-	viewer.addHandler('animation', function(event){
-		transform();
-	});
-	viewer.addHandler("page", function (data) {
-		console.log(data.page,params.tileSources[data.page]);
-	});
-	viewer.addViewerInputHook({hooks: [
-		{tracker: 'viewer', handler: 'clickHandler', hookHandler: clickHandler},
-		{tracker: 'viewer', handler: 'pressHandler', hookHandler: pressHandler},
-		{tracker: 'viewer', handler: 'dragHandler', hookHandler: dragHandler},
-		{tracker: 'viewer', handler: 'dragEndHandler', hookHandler: dragEndHandler}
-	]});
+//	viewer.addHandler('open',function(){
+//		initAnnotationOverlay();
+//		updateSliceName();
+//	});
+//	viewer.addHandler('animation', function(event){
+//		transform();
+//	});
+//	viewer.addHandler("page", function (data) {
+//		console.log(data.page,params.tileSources[data.page]);
+//	});
+//	viewer.addViewerInputHook({hooks: [
+//		{tracker: 'viewer', handler: 'clickHandler', hookHandler: clickHandler},
+//		{tracker: 'viewer', handler: 'pressHandler', hookHandler: pressHandler},
+//		{tracker: 'viewer', handler: 'dragHandler', hookHandler: dragHandler},
+//		{tracker: 'viewer', handler: 'dragEndHandler', hookHandler: dragEndHandler}
+//	]});
+//    
+      viewer.addHandler('open',function(){
+        initAnnotationOverlay();
+      });
+
+      viewer.addHandler('animation', function(event){
+        transform();
+      });
+
+      viewer.addViewerInputHook({hooks: [
+        {tracker: 'viewer', handler: 'clickHandler', hookHandler: clickHandler},
+        {tracker: 'viewer', handler: 'dragHandler', hookHandler: dragHandler},
+        {tracker: 'viewer', handler: 'dragEndHandler', hookHandler: dragEndHandler},
+        {tracker: 'viewer', handler: 'dblClickHandler', hookHandler: dblClickHandler}
+        //{tracker: 'viewer', handler: 'moveHandler', hookHandler: moveHandler}, //moveHandler
+      ]});
 
 	if( debug ) console.log("< initMicrodraw2 resolve: success");
 }
@@ -2158,7 +2176,7 @@ $(function() {
 				myOrigin.appName = "microdraw";
 				myOrigin.slice = currentImage;
 				myOrigin.source = params.source;
-				updateUser();
+//				updateUser();
 			}).then(initMicrodraw);
 		} else {
 			params = deparam();
@@ -2262,22 +2280,22 @@ microdrawDBLoad();
 
 // Click handlers
   // add handlers: update slice name, animation, page change, mouse actions
-  viewer.addHandler('open',function(){
-    initAnnotationOverlay();
-  });
-
-  viewer.addHandler('animation', function(event){
-    transform();
-  });
-
-  viewer.addViewerInputHook({hooks: [
-    {tracker: 'viewer', handler: 'clickHandler', hookHandler: clickHandler},
-    {tracker: 'viewer', handler: 'dragHandler', hookHandler: dragHandler},
-    {tracker: 'viewer', handler: 'dragEndHandler', hookHandler: dragEndHandler},
-    {tracker: 'viewer', handler: 'dblClickHandler', hookHandler: dblClickHandler}
-    //{tracker: 'viewer', handler: 'moveHandler', hookHandler: moveHandler}, //moveHandler
-  ]});
-  var imagingHelper = viewer.activateImagingHelper({});
+//  viewer.addHandler('open',function(){
+//    initAnnotationOverlay();
+//  });
+//
+//  viewer.addHandler('animation', function(event){
+//    transform();
+//  });
+//
+//  viewer.addViewerInputHook({hooks: [
+//    {tracker: 'viewer', handler: 'clickHandler', hookHandler: clickHandler},
+//    {tracker: 'viewer', handler: 'dragHandler', hookHandler: dragHandler},
+//    {tracker: 'viewer', handler: 'dragEndHandler', hookHandler: dragEndHandler},
+//    {tracker: 'viewer', handler: 'dblClickHandler', hookHandler: dblClickHandler}
+//    //{tracker: 'viewer', handler: 'moveHandler', hookHandler: moveHandler}, //moveHandler
+//  ]});
+//  var imagingHelper = viewer.activateImagingHelper({});
   /***2
   Interaction: mouse and tap
   */

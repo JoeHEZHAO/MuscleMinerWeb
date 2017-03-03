@@ -134,6 +134,7 @@
     {tracker: 'viewer', handler: 'dblClickHandler', hookHandler: dblClickHandler}
     //{tracker: 'viewer', handler: 'moveHandler', hookHandler: moveHandler}, //moveHandler
   ]});
+    
   var imagingHelper = viewer.activateImagingHelper({});
   /***2
   Interaction: mouse and tap

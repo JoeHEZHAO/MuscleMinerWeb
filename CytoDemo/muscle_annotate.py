@@ -149,7 +149,7 @@ def uploadmp3(): # check for post data
 def getslides(filename):
     if filename == None:
         # Get all Whole slide microscopy images
-        ALLOWED_EXTENSIONS = set(['svs', 'ndpi', 'bmp', 'png'])
+        ALLOWED_EXTENSIONS = set(['svs', 'ndpi', 'jpg', 'png'])
         filelists = []
         cur_path = os.getcwd()
         for ext in ALLOWED_EXTENSIONS:
@@ -225,7 +225,7 @@ def segmentation():
     if request.method == 'POST':
         # getting name info
 #        filename = app.config['GLOBAL_FILE_NAME']
-        filename = 'img_mask2.png'
+        filename = 'img_mask2_cropped.png'
         prefix = filename[:-3]
         try:
             # do segmentation\\
