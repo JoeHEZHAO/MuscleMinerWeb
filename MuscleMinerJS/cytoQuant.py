@@ -1,10 +1,28 @@
 #!/usr/bin/env python
 import os, sys, time
-from flask import Flask, url_for, render_template
+from flask import Flask, url_for, render_template, make_response
 from flask import redirect, request, send_file, jsonify
 from werkzeug import secure_filename
 from util import dosegmentation, createdz
 from util import delete_files, check_file_size
+
+from io import BytesIO
+import openslide
+from openslide import ImageSlide, open_slide
+from openslide.deepzoom import DeepZoomGenerator
+from optparse import OptionParser
+from unicodedata import normalize
+import re, glob, json, base64
+
+
+DEEPZOOM_SLIDE = None
+DEEPZOOM_FORMAT = 'jpeg'
+DEEPZOOM_TILE_SIZE = 512
+DEEPZOOM_OVERLAP = 1
+DEEPZOOM_LIMIT_BOUNDS = True
+DEEPZOOM_TILE_QUALITY = 75
+SLIDE_NAME = 'slide'
+
 
 # Initialize Flaks instance
 app = Flask(__name__)
@@ -27,6 +45,11 @@ app.config['SAVE_FOLDER_detection'] = 'static/files/detection_data/'
 if not os.path.isdir(app.config['SAVE_FOLDER_detection']):
     os.mkdir(app.config['SAVE_FOLDER_detection'])
 
+class PILBytesIO(BytesIO):
+    def fileno(self):
+        '''Classic PIL doesn't understand io.UnsupportedOperation.'''
+        raise AttributeError('Not supported')
+
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'tif', 'bmp'])
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
@@ -36,6 +59,21 @@ def shutdown_server():
     if func is None:
         raise RuntimeError('Not running with the Werkzeug Server')
     func()
+
+def load_slide(name):
+    slidefile = app.config['DEEPZOOM_SLIDE']
+    if slidefile is None:
+        raise ValueError('No slide file specified')
+    config_map = {
+        'DEEPZOOM_TILE_SIZE': 'tile_size',
+        'DEEPZOOM_OVERLAP': 'overlap',
+        'DEEPZOOM_LIMIT_BOUNDS': 'limit_bounds',
+    }
+    # opts = dict((v, app.config[k]) for k, v in config_map.items())
+    slide = open_slide(slidefile)
+    app.slides = {
+        name: DeepZoomGenerator(slide)
+    }
 
 @app.route('/shutdown', methods=['POST'])
 def shutdown():
@@ -63,50 +101,73 @@ def segmentation():
             result["error"]=1
             return jsonify(result)
 
+# Assume Whole slide images are placed in folder slides
+@app.route('/slides/', defaults={'filename': None})
+@app.route('/slides/<filename>')
+def getslides(filename):
+    if filename == None:
+        # Get all Whole slide microscopy images
+        ALLOWED_EXTENSIONS = set(['svs', 'ndpi', 'bmp', 'png'])
+        filelists = []
+        cur_path = os.getcwd()
+        for ext in ALLOWED_EXTENSIONS:
+            filelists.extend(glob.glob(os.path.join(cur_path, 'slides', '*.' + ext)))
+        # setting obj configs
+        obj_config = {}
+        # set tile_sources and names
+        tile_sources = []
+        names = []
+        for ind, filepath in enumerate(filelists):
+            head, tail = os.path.split(filepath)
+            tile_sources.append('slides/'+tail)
+            names.append(ind)
+        obj_config['tileSources'] = tile_sources
+        obj_config['names'] = names
+        # set configuration and pixelsPermeter
+        obj_config['configuration'] = None
+        obj_config['pixelsPerMeter'] = 1
 
-@app.route('/detection', methods=['GET', 'POST'])
-def detection():
-    if request.method == 'POST' and app.config['GLOBAL_FILE_NAME'] != '':
-        # getting name info
-        filename = app.config['GLOBAL_FILE_NAME']
-        surfix = filename[-4:]
-        perfix = filename[:-4]
-        print '!!!!!', filename
+        app.config["Files"] = obj_config
 
-        # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        #prob = dodetection(app.config['UPLOAD_FOLDER'], filename, \app.config['SAVE_FOLDER_detection'] )
-        #generate detection result with deep zoom format
-        dzipath = createdz(os.path.join(app.config['SAVE_FOLDER_detection'], filename))
+        return jsonify(obj_config)
+    else:
+        # app.config['DEEPZOOM_SLIDE'] = './slides/105357.svs'
+        app.config['DEEPZOOM_SLIDE'] = './slides/'+filename
+        name, ext = os.path.splitext(filename)
+        load_slide(name)
+        slide_url = url_for('dzi', slug=name)
+        return slide_url
 
-        return render_template("entry.html", path = dzipath)
-    return render_template("entry.html", path = '')
+@app.route('/<slug>.dzi')
+def dzi(slug):
+    format = 'jpeg'
+    try:
+        resp = make_response(app.slides[slug].get_dzi(format))
+        resp.mimetype = 'application/xml'
+        return resp
+    except KeyError:
+        # Unknown slug
+        abort(404)
 
-
-@app.route('/upload', methods=['GET', 'POST'])
-def just_upload_file():
-    if request.method == 'POST':
-        # delete previous files
-        delete_files(app.config['UPLOAD_FOLDER'])
-        # delete_files(app.config['SAVE_FOLDER_segmentation'])
-        delete_files(app.config['SAVE_FOLDER_detection'])
-
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            print "---upload", file.filename
-            # set GLOBAL_FILE_NAME
-            app.config['GLOBAL_FILE_NAME'] = filename
-            # save a copy to UPLOAD_FOLDER
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            # create dzifile
-            dzipath = createdz(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            # if path != '', then exec editPaperSeg.js
-            return render_template("entry.html", path = dzipath)
-    return render_template("entry.html", path = '')
-
-@app.route('/search', methods=['GET', 'POST'])
-def search():
-    return render_template("entry.html", path = '')
+@app.route('/<slug>_files/<int:level>/<int:col>_<int:row>.<format>')
+def tile(slug, level, col, row, format):
+    format = format.lower()
+    if format != 'jpeg' and format != 'png':
+        # Not supported by Deep Zoom
+        abort(404)
+    try:
+        tile = app.slides[slug].get_tile(level, (col, row))
+    except KeyError:
+        # Unknown slug
+        abort(404)
+    except ValueError:
+        # Invalid level or coordinates
+        abort(404)
+    buf = PILBytesIO()
+    tile.save(buf, format, quality=app.config['DEEPZOOM_TILE_QUALITY'])
+    resp = make_response(buf.getvalue())
+    resp.mimetype = 'image/%s' % format
+    return resp
 
 @app.route('/')
 def index():

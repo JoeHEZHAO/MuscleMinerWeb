@@ -9,13 +9,6 @@
 		<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Tangerine">
 		<title>CytoQuant</title>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-2.2.3.js') }}"></script>
-			<script type="text/javascript">
-					$( document ).ready(function() {
-						$('#flupload').change(function() {
-							$('#txtupload').val($('#flupload').val());
-						});
-					});
-			</script>
 	</head>
 
 
@@ -28,22 +21,6 @@
 										<img src="static/logo_V1.gif" alt="Mountain View" style="width:200px;border:0" >
 									</div>
 									<!-- logo div ends -->
-
-									<!-- file choose div starts -->
-									<form class="c-fm-w" action="{{ url_for('just_upload_file') }}" align="center" method=post enctype=multipart/form-data>
-										<div id="searchBox">
-												<input type="text" id="txtupload"/>
-												<input type="file" name="file" id="flupload"/>
-												<input type="submit" name="submit" value="GO" />
-										</div>
-								 </form>
-								 <!-- file choose div ends -->
-
-								 <!-- icon div starts -->
-								 <div id="theme" >
-										<img src="static/icons/CytoQuant_icon.png" alt="CytoQuant" style="width:150px;border:0" >
-								 </div>
-								 <!-- icon div ends -->
 					</div>
 
 					<!-- seg, detect and search boxes start-->
@@ -56,24 +33,6 @@
 							</form>
 						</td>
 						<!-- segmentation ends -->
-
-						<!-- detect -->
-						<td style="text-align:center;white-space:nowrap">
-							<form action="{{ url_for('detection') }}" align="center" method=post enctype=multipart/form-data>
-								<li style="list-style-type:none"><input type="image" class="circle_image" src="{{ url_for('static', filename = 'icons/detection_icon.png') }}" border="0" alt="Submit"></li>
-								<li style="list-style-type:none"><input type="submit"  value="Detection" class="bt-function"></li>
-							</form> </nobr>
-						</td>
-						<!-- detect ends -->
-
-						<!-- search -->
-						<td style="text-align:center;white-space:nowrap">
-							<form action="{{ url_for('search') }}" align="center" method=post enctype=multipart/form-data>
-								<li style="list-style-type:none"><input type="image" class="circle_image" src="{{ url_for('static', filename = 'icons/cloud_icon.png') }}" border="0" alt="Submit"></li>
-								<li style="list-style-type:none"><input type="submit"  value="Search" class="bt-function"></li>
-							</form>
-						</td>
-						<!-- search ends -->
 					</tr>
 					<!-- seg, detect and search boxes end -->
 		</table>
@@ -92,42 +51,73 @@
 				ALL RIGHTS RESERVED.</p>
 		</footer>
 	<!-- footer ends	 -->
-
 			<script type="text/javascript" src="{{ url_for('static', filename='js/paper-full.min.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/openseadragon.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/openseadragon-imaginghelper.min.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/viewerinputhook.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/loadingoverlay.min.js') }}"></script>
-		{% if path != '' %}
-				<script type="text/javascript">
-				// var tileSource = {
-				// 	Image: {
-				// 		xmlns: "http://schemas.microsoft.com/deepzoom/2008",
-				// 		Url: "{{ path }}",
-				// 		Format: "jpg",
-				// 		Overlap: "2",
-				// 		TileSize: "256"
-				// 	}
-				// };
-				console.log("{{path}}");
-				var viewer = OpenSeadragon({
-					id: "openseadragon1",
-					prefixUrl: "{{ url_for('static', filename='images/') }}",
-					tileSources: "{{ path }}",
-					maxZoomPixelRatio: "5",
-					maxZoomLevel: "5",
-					gestureSettingsMouse: {clickToZoom: false,dblClickToZoom: false},
-					dblClickTimeThreshold: 1000
-				});
+			<script type="text/javascript">
+				$( document ).ready(function() {
+					var imageOrder = []; 
+					var ImageInfo = {}; 
 
-				</script>
-				<script type="text/javascript" src="{{ url_for('static', filename='js/editPaperSeg.js') }}"></script>
-		{% endif %}
-				<script>
-					function submit_search() {
-						var div1 = document.getElementById("movie-section");
-						div1.style.backgroundColor= 'blue'
+					function initMicrodraw() {
+
+						viewer = new OpenSeadragon.Viewer({
+							id: "openseadragon1",
+							prefixUrl: "{{ url_for('static', filename='images/') }}",
+							tileSources: [],
+							showReferenceStrip: false,
+							referenceStripSizeRatio: 0.2,
+							showNavigator: true,
+							sequenceMode: false,
+							// navigatorId:"myNavigator",
+							zoomInButton:"zoom-in",
+							zoomOutButton:"zoom-out",
+							homeButton:"home",
+							preserveViewport: true
+						});
+
+						$.ajax({
+								type: 'GET',
+								url: '/slides',
+								dataType: "json",
+								contentType: "application/json",
+								success: function(obj){
+						            console.log(obj);
+									initMicrodraw2(obj);
+								}
+						});
 					}
-				</script>
+
+					function initMicrodraw2(obj) {
+						for( var i = 0; i < obj.tileSources.length; i++ ) {
+							// name is either the index of the tileSource or a named specified in the json file
+							var name = ((obj.names && obj.names[i]) ? String(obj.names[i]) : String(i));
+							imageOrder.push(name);
+							ImageInfo[name] = {"source": obj.tileSources[i], "Regions": [], "projectID": undefined};
+						}
+
+						// params.tileSources = obj.tileSources;
+						var start_slice = 0;
+						var currentImage = imageOrder[start_slice];
+						imagingHelper = viewer.activateImagingHelper({});
+
+						// open the currentImage	
+						$.ajax({
+								type: 'GET',
+								url: ImageInfo[currentImage]["source"],
+								async: false,
+								success: function(obj){
+									viewer.open(obj); // localhost/name.dzi
+								}
+						});
+					}
+
+					initMicrodraw();
+				});
+			</script>
+			
+			<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/editPaperSeg.js') }}"></script> -->
 		</body>
 	</html>
