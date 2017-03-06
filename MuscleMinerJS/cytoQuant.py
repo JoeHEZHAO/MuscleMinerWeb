@@ -84,13 +84,14 @@ def shutdown():
 def segmentation():
     # image should be uploaded and segmentation request be sent
     print "working here"
-    if request.method == 'POST' and app.config['GLOBAL_FILE_NAME'] != '':
+    if request.method == 'POST':
         # getting name info
-        filename = app.config['GLOBAL_FILE_NAME']
+        filename = 'img_mask2.bmp'
         prefix = filename[:-3]
         try:
             # do segmentation\\
             filename = prefix + 'png'
+            print filename
             result = dosegmentation(app.config['SAVE_FOLDER_segmentation'],
                 filename, app.config['SAVE_FOLDER_segmentation'] )
             return result
@@ -164,7 +165,7 @@ def tile(slug, level, col, row, format):
         # Invalid level or coordinates
         abort(404)
     buf = PILBytesIO()
-    tile.save(buf, format, quality=app.config['DEEPZOOM_TILE_QUALITY'])
+    tile.save(buf, format, quality=75)
     resp = make_response(buf.getvalue())
     resp.mimetype = 'image/%s' % format
     return resp

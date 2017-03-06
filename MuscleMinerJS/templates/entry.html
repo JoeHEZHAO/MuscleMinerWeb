@@ -109,6 +109,7 @@
 								url: ImageInfo[currentImage]["source"],
 								async: false,
 								success: function(obj){
+									console.log(obj);
 									viewer.open(obj); // localhost/name.dzi
 								}
 						});
