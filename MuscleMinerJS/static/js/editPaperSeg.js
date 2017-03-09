@@ -1,10 +1,11 @@
-// (function(){
-
 var viewer;
 
-$( document ).ready(function() {
+$(document).ready(function() {
           var imageOrder = []; 
-          var ImageInfo = {}; 
+          var ImageInfo = {};
+          var start_slice = 0;
+          var imageNumber;
+          var currentImage;
 
           function initMicrodraw() {
 
@@ -30,7 +31,7 @@ $( document ).ready(function() {
                 contentType: "application/json",
                 success: function(obj){
                         console.log(obj);
-                  initMicrodraw2(obj);
+                        initMicrodraw2(obj);
                 }
             });
           }
@@ -42,13 +43,19 @@ $( document ).ready(function() {
               imageOrder.push(name);
               ImageInfo[name] = {"source": obj.tileSources[i], "Regions": [], "projectID": undefined};
             }
+            imageNumber = obj.tileSources.length;
 
             // params.tileSources = obj.tileSources;
-            var start_slice = 0;
-            var currentImage = imageOrder[start_slice];
+            start_slice = 0;
+            currentImage = imageOrder[start_slice];
             imagingHelper = viewer.activateImagingHelper({});
 
             // open the currentImage  
+            loadingImage(currentImage);
+          }
+          initMicrodraw();
+
+          function loadingImage(currentImage){
             $.ajax({
                 type: 'GET',
                 url: ImageInfo[currentImage]["source"],
@@ -58,13 +65,26 @@ $( document ).ready(function() {
                 }
             });
           }
-          initMicrodraw();
+
+          // prev and next button event to load different slides
+          $('#next').on('click',function() {
+              var index = imageOrder.indexOf(currentImage);
+              var nextIndex = (index + 1) % imageOrder.length;
+              currentImage = imageOrder[nextIndex];
+              loadingImage(currentImage);
+          })
+
+          $('#prev').on('click',function() {
+              var index = imageOrder.indexOf(currentImage);
+              var previousIndex = ((index - 1 >= 0)? index - 1 : imageOrder.length - 1 );
+              currentImage = imageOrder[previousIndex];
+              loadingImage(currentImage);
+          })
 
   // paper.js is global here
   paper.install(window);
   var w, h,isDown = false, pIndex = -1,
   pts = [];
-  //var canvas;
   var contours;
   var debug = false;
   var magicV = 1000;
@@ -78,9 +98,20 @@ $( document ).ready(function() {
 
     if(debug) console.log("new overlay size" + viewer.world.getItemAt(0).getContentSize());
 
+    // get wrapper canvas width and height
+    // console.log($('.openseadragon-canvas').width());
+    // console.log($('.openseadragon-canvas').height());
+
+    // check whether canvasdiv or canvas exist
+    if (document.getElementById("canvasdiv")) {
+        $('#canvasdiv').remove();
+        $('#canvas-overlay').remove();
+    }
+
     // create a canvas overlay to draw everything
     // create canvas
-    canvasdiv = document.createElement( 'div');
+    canvasdiv = document.createElement('div');
+    canvasdiv.setAttribute('id', 'canvasdiv');
     canvasdiv.style.position = 'absolute';
     canvasdiv.style.left = 0;
     canvasdiv.style.top = 0;
@@ -90,6 +121,8 @@ $( document ).ready(function() {
     canvas = document.createElement('canvas');
     canvas.setAttribute('class', 'overlay');
     canvas.setAttribute('id', 'canvas-overlay');
+    canvas.style.width = $('.openseadragon-canvas').width();
+    canvas.style.height = $('.openseadragon-canvas').height();
     canvasdiv.appendChild(canvas);
 
     // create project
@@ -110,21 +143,14 @@ $( document ).ready(function() {
 
   function resizeAnnotationOverlay() {
     if( debug ) console.log("> resizeAnnotationOverlay");
-    var changed=false;
     var bounds = viewer.viewport.getBounds(true);
     //viewer.container.clientWidth
-    if (containerWidth !== viewer.container.clientWidth) {
-      containerWidth = viewer.container.clientWidth;
-      $("canvas.overlay").width(containerWidth);
-      changed=true;
-    }
-    if (containerHeight !== viewer.container.clientHeight) {
-      containerHeight = viewer.container.clientHeight;
-      $("canvas.overlay").height(containerHeight);
-      changed=true;
-    }
-    if(changed)paper.view.viewSize = [containerWidth, containerHeight];
-
+    containerWidth = viewer.container.clientWidth;
+    $("canvas.overlay").width(containerWidth);  
+    containerHeight = viewer.container.clientHeight;
+    console.log(containerHeight);
+    $("canvas.overlay").height(containerHeight);
+    paper.view.viewSize = [containerWidth, containerHeight];
   }
 
   var z=1;
@@ -180,6 +206,7 @@ var running;
 
   // add handlers: update slice name, animation, page change, mouse actions
   viewer.addHandler('open',function(){
+    console.log('init paper and annotation layer!');
     initAnnotationOverlay();
   });
 
@@ -630,4 +657,3 @@ var running;
     }
   }
 });
-// })();

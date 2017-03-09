@@ -31,8 +31,13 @@
 						<!-- segmentation ends -->
 					</tr>
 					<!-- seg, detect and search boxes end -->
-		</table>
-	</div>
+			</table>
+		</div>
+
+		<div>
+			<button class="button" id="prev" title="Previous slice"><img src="../static/images/prev.svg"></button>
+			<button class="button" id="next" title="Next slice" ><img src="../static/images/next.svg"></button>
+		</div>
 
 
 
@@ -54,6 +59,5 @@
 			<script type="text/javascript" src="{{ url_for('static', filename='js/loadingoverlay.min.js') }}"></script>
 			<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/init_slides.js') }}" ></script> -->
 			<script type="text/javascript" src="{{ url_for('static', filename='js/editPaperSeg.js') }}"></script>
-			
 		</body>
 	</html>
