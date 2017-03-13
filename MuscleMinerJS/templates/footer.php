@@ -1,5 +1,5 @@
 <footer>
-	<div id="footer" style="background-image: url(<?php echo base_url('images/backgrounds/bg-5.png'); ?>);">
+	<div id="footer" style="background-image: url('static/images/bg-5.png'); margin-top: 50px;">
 		<div class="container">
 			<div class="row">
 				<div class="col-sm-4">
