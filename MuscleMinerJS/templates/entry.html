@@ -4,34 +4,25 @@
 	<head>
 		<meta charset="utf-8">
 		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='cyto.css') }}">  
 		<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-2.2.3.js') }}"></script>
 		<title>CytoQuant</title>
 	</head>
 
 	<body>
 		<div class="wrapper">
-			<table align="center">
-					<div id="container">
-									<!-- logo div starts -->
-									<div id="logo">
-										<img src="static/logo_V1.gif" alt="Mountain View" style="width:200px;border:0" >
-									</div>
-									<!-- logo div ends -->
-					</div>
 
-					<!-- seg, detect and search boxes start-->
-					<tr>
-						<!-- segmentation  -->
-						<td style="text-align:center;white-space:nowrap">
-							<form id="frmsegment" action="{{ url_for('segmentation') }}" align="center" method=post enctype=multipart/form-data>
-								<div style="list-style-type:none"><input type="image" class="circle_image" src="{{ url_for('static', filename = 'icons/segmentation_icon.png') }}" border="0" alt="Submit"></div>
-								<div style="list-style-type:none" ><input id="btnSegment" type="button"   value="Segmentation" class="bt-function"></div>
-							</form>
-						</td>
-						<!-- segmentation ends -->
-					</tr>
-					<!-- seg, detect and search boxes end -->
-			</table>
+			<!-- HEADER START -->
+			<header id="header-container">
+				<!-- NAVIGATION BAR -->
+				{% block header %}
+					{% 
+						include 'navigation_bar.php'
+					%}
+				{% endblock %}	
+				<!-- NAVIGATION BAR -->
+			</header><!-- HEADER CONTAINER -->
 		</div>
 
 		<div>
@@ -41,23 +32,25 @@
 
 
 
-	<!-- pic start -->
-	<div id="openseadragon1"></div>
-	<!-- pic ends -->
+		<!-- pic start -->
+		<div id="openseadragon1"></div>
+		<!-- pic ends -->
 
-  <!-- footer start -->
-		<footer align="center" style="position:relative; bottom:0px; height:10px; width: 1000px">
-			<p style="font-size:16px" class="copyright" align="center">Copyright @2016,
-				<a href="http://www.bme.ufl.edu/labs/yang/" target="_blank" >BICI2 Lab.</a>
-				ALL RIGHTS RESERVED.</p>
-		</footer>
-	<!-- footer ends	 -->
+	    <!-- footer start -->
+	    {% block footer %}
+			{% 
+				include 'footer.php' 
+			%} 
+		{% endblock %}
+	    <!-- footer end -->
+
+	</div><!-- MAIN CONTAINER -->
 			<script type="text/javascript" src="{{ url_for('static', filename='js/paper-full.min.js') }}"></script>
+			<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/custom.js') }}"></script> -->
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/openseadragon.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/openseadragon-imaginghelper.min.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/viewerinputhook.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/loadingoverlay.min.js') }}"></script>
-			<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/init_slides.js') }}" ></script> -->
 			<script type="text/javascript" src="{{ url_for('static', filename='js/editPaperSeg.js') }}"></script>
 		</body>
 	</html>

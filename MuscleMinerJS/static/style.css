@@ -11,7 +11,7 @@ body
 	font-family: 'Ubuntu', serif;
     font-size: 15px;
 	/*font-family: arial, sans-serif;*/
-	width: 1000px;
+	width: 100%;
 	/*max-width: 1268px;*/
 	min-width: 480px;
 	margin: 0 auto;
@@ -266,8 +266,7 @@ transition: linear background-color 0.4s;-moz-transition: linear background-colo
 
 .wrapper{
 	background:#F8F8FF;
-	width: 1000px;
-	height: 240px;
+	width: 100%;
 }
 
 .overlay {
