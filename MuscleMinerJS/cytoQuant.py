@@ -86,7 +86,7 @@ def segmentation():
     print "working here"
     if request.method == 'POST':
         # getting name info
-        filename = 'img_mask2.bmp'
+        filename = 'seg_bg.bmp'
         prefix = filename[:-3]
         try:
             # do segmentation\\
@@ -108,7 +108,7 @@ def segmentation():
 def getslides(filename):
     if filename == None:
         # Get all Whole slide microscopy images
-        ALLOWED_EXTENSIONS = set(['svs', 'ndpi', 'bmp', 'png'])
+        ALLOWED_EXTENSIONS = set(['svs', 'ndpi','jpg','bmp', 'png'])
         filelists = []
         cur_path = os.getcwd()
         for ext in ALLOWED_EXTENSIONS:
