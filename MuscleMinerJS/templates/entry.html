@@ -3,15 +3,17 @@
 	<html>
 	<head>
 		<meta charset="utf-8">
-		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-		<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
-		<link rel="stylesheet" href="{{ url_for('static', filename='cyto.css') }}">  
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/cyto.css') }}">  
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700">
 		<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-2.2.3.js') }}"></script>
 		<title>CytoQuant</title>
 	</head>
 
 	<body>
-		<div class="wrapper">
+		<div class="main-container">
 
 			<!-- HEADER START -->
 			<header id="header-container">
@@ -23,7 +25,6 @@
 				{% endblock %}	
 				<!-- NAVIGATION BAR -->
 			</header><!-- HEADER CONTAINER -->
-		</div>
 
 		<div>
 			<button class="button" id="prev" title="Previous slice"><img src="../static/images/prev.svg"></button>
@@ -33,7 +34,9 @@
 
 
 		<!-- pic start -->
-		<div id="openseadragon1"></div>
+		<div id="openseadragon1">
+
+		</div>
 		<!-- pic ends -->
 
 	    <!-- footer start -->
@@ -46,11 +49,37 @@
 
 	</div><!-- MAIN CONTAINER -->
 			<script type="text/javascript" src="{{ url_for('static', filename='js/paper-full.min.js') }}"></script>
-			<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/custom.js') }}"></script> -->
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/openseadragon.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/openseadragon-imaginghelper.min.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/viewerinputhook.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/loadingoverlay.min.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/editPaperSeg.js') }}"></script>
+			<script type="text/javascript">
+				function sticky() {
+		
+					var sticky_point = 155;
+					
+					$("#header").clone().attr({
+						id: "header-sticky",
+						class: ""
+					}).insertAfter("header");
+					
+					$("#header-sticky #logo img").attr("src", "../static/images/cyto_logo_sticky.png");
+					
+					$(window).scroll(function(){
+						
+						if ($(window).scrollTop() > sticky_point) {  
+							$("#header-sticky").slideDown(300).addClass("header-sticky");
+							$("#header .menu ul, #header .menu .megamenu-container").css({"visibility": "hidden"});
+						} else {
+							$("#header-sticky").slideUp(100).removeClass("header-sticky");
+							$("#header .menu ul, #header .menu .megamenu-container").css({"visibility": "visible"});
+						}
+						
+					});
+					
+				}
+				sticky();
+			</script>
 		</body>
 	</html>

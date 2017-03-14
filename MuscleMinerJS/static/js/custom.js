@@ -101,7 +101,6 @@
 		
 	}
 	
-	
 	// STICKY //
 	function sticky() {
 		
