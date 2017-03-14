@@ -32,11 +32,18 @@
 				<div id="myNavigator"></div>
 			</div>
 
-			<div class="row" style="height:10px">
+			<div class="row">
 				<div class="cell" style="text-align:center">
 					<button class="button" id="prev" title="Previous slice"><img src="../static/images/prev.svg"></button>
 					<button class="button" id="next" title="Next slice" ><img src="../static/images/next.svg"></button>
 				</div>
+			</div>
+
+			<div class="row">
+				<form id="frmsegment" action="{{ url_for('segmentation') }}" align="center" method=post enctype=multipart/form-data>
+					<div ><input type="image" class="circle_image" src="{{ url_for('static', filename = 'icons/segmentation_icon.png') }}" border="0" alt="Submit"></div>
+					<div ><input id="btnSegment" type="button"   value="Segmentation" class="bt-function"></div>
+				</form>
 			</div>
 		</div>
 
