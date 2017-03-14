@@ -26,12 +26,19 @@
 				<!-- NAVIGATION BAR -->
 			</header><!-- HEADER CONTAINER -->
 
-		<div>
-			<button class="button" id="prev" title="Previous slice"><img src="../static/images/prev.svg"></button>
-			<button class="button" id="next" title="Next slice" ><img src="../static/images/next.svg"></button>
+		<!-- menu -->
+		<div id="menuBar" class="table" style="top: 100px;">
+			<div class="row">
+				<div id="myNavigator"></div>
+			</div>
+
+			<div class="row" style="height:10px">
+				<div class="cell" style="text-align:center">
+					<button class="button" id="prev" title="Previous slice"><img src="../static/images/prev.svg"></button>
+					<button class="button" id="next" title="Next slice" ><img src="../static/images/next.svg"></button>
+				</div>
+			</div>
 		</div>
-
-
 
 		<!-- pic start -->
 		<div id="openseadragon1">
@@ -54,32 +61,5 @@
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/viewerinputhook.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/loadingoverlay.min.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/editPaperSeg.js') }}"></script>
-			<script type="text/javascript">
-				function sticky() {
-		
-					var sticky_point = 155;
-					
-					$("#header").clone().attr({
-						id: "header-sticky",
-						class: ""
-					}).insertAfter("header");
-					
-					$("#header-sticky #logo img").attr("src", "../static/images/cyto_logo_sticky.png");
-					
-					$(window).scroll(function(){
-						
-						if ($(window).scrollTop() > sticky_point) {  
-							$("#header-sticky").slideDown(300).addClass("header-sticky");
-							$("#header .menu ul, #header .menu .megamenu-container").css({"visibility": "hidden"});
-						} else {
-							$("#header-sticky").slideUp(100).removeClass("header-sticky");
-							$("#header .menu ul, #header .menu .megamenu-container").css({"visibility": "visible"});
-						}
-						
-					});
-					
-				}
-				sticky();
-			</script>
 		</body>
 	</html>

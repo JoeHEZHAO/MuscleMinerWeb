@@ -273,3 +273,23 @@ transition: linear background-color 0.4s;-moz-transition: linear background-colo
 	width:100%;
 	height:100%;
 }
+
+#menuBar {
+	position:absolute;
+	width:200px;
+	height: 100%;
+	top:0;
+	left:0;
+	background-color:rgba(200,200,200,0.5);
+	z-index:10;
+	display:block;
+}
+
+#myNavigator {
+	position:absolute;
+	width:200px;
+	height:150px;
+	top:0px;
+	left:0px;
+	z-index:10;
+}

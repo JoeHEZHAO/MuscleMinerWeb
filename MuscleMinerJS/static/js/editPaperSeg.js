@@ -7,6 +7,26 @@ $(document).ready(function() {
           var imageNumber;
           var currentImage;
 
+          function sticky() {
+              var sticky_point = 155;
+              $("#header").clone().attr({
+                id: "header-sticky",
+                class: ""
+              }).insertAfter("header");
+              
+              $("#header-sticky #logo img").attr("src", "../static/images/cyto_logo_sticky.png");
+              
+              $(window).scroll(function(){ 
+                  if ($(window).scrollTop() > sticky_point) {  
+                    $("#header-sticky").slideDown(300).addClass("header-sticky");
+                    $("#header .menu ul, #header .menu .megamenu-container").css({"visibility": "hidden"});
+                  } else {
+                    $("#header-sticky").slideUp(100).removeClass("header-sticky");
+                    $("#header .menu ul, #header .menu .megamenu-container").css({"visibility": "visible"});
+                  }
+              });    
+          }
+
           function initMicrodraw() {
 
             viewer = new OpenSeadragon.Viewer({
@@ -17,7 +37,7 @@ $(document).ready(function() {
               referenceStripSizeRatio: 0.2,
               showNavigator: true,
               sequenceMode: false,
-              // navigatorId:"myNavigator",
+              navigatorId:"myNavigator",
               zoomInButton:"zoom-in",
               zoomOutButton:"zoom-out",
               homeButton:"home",
@@ -52,6 +72,7 @@ $(document).ready(function() {
 
             // open the currentImage  
             loadingImage(currentImage);
+            sticky();
           }
           initMicrodraw();
 
