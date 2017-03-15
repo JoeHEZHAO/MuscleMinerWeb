@@ -86,7 +86,7 @@ def segmentation():
     print "working here"
     if request.method == 'POST':
         # getting name info
-        filename = 'seg_bg.bmp'
+        filename = 'img_mask1.bmp'
         prefix = filename[:-3]
         try:
             # do segmentation\\
