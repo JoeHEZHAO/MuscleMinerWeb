@@ -29,7 +29,6 @@ def dosegmentation(imgpath, imgname, savepath):
         color = [0,0,255] , linewidth= 2, border_dist=5)
 
     # print res
-    # print "1111111111111111111111111111111"
     return res
 
 def createdz(fullimgname, fullwritename=None):
