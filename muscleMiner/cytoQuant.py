@@ -86,7 +86,7 @@ def segmentation():
     print "working here"
     if request.method == 'POST':
         # getting name info
-        print app.config['GLOBAL_FILE_NAME']
+        # print app.config['GLOBAL_FILE_NAME']
         filename = app.config['GLOBAL_FILE_NAME']
         prefix = filename[:-3]
         try:
