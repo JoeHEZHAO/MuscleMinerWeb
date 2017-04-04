@@ -29,20 +29,20 @@ $(document).ready(function() {
 
           function initMicrodraw() {
 
-            viewer = new OpenSeadragon.Viewer({
-              id: "openseadragon1",
-              prefixUrl: "{{ url_for('static', filename='images/') }}",
-              tileSources: [],
-              showReferenceStrip: false,
-              referenceStripSizeRatio: 0.2,
-              showNavigator: true,
-              sequenceMode: false,
-              navigatorId:"myNavigator",
-              zoomInButton:"zoom-in",
-              zoomOutButton:"zoom-out",
-              homeButton:"home",
-              preserveViewport: true
-            });
+            // viewer = new OpenSeadragon.Viewer({
+            //   id: "openseadragon1",
+            //   prefixUrl: "{{ url_for('static', filename='images/') }}",
+            //   tileSources: [],
+            //   showReferenceStrip: false,
+            //   referenceStripSizeRatio: 0.2,
+            //   showNavigator: true,
+            //   sequenceMode: false,
+            //   navigatorId:"myNavigator",
+            //   zoomInButton:"zoom-in",
+            //   zoomOutButton:"zoom-out",
+            //   homeButton:"home",
+            //   preserveViewport: true
+            // });
 
             $.ajax({
                 type: 'GET',
@@ -68,7 +68,7 @@ $(document).ready(function() {
             // params.tileSources = obj.tileSources;
             start_slice = 0;
             currentImage = imageOrder[start_slice];
-            console.log(currentImage)
+            // console.log(currentImage)
             imagingHelper = viewer.activateImagingHelper({});
 
             // open the currentImage  
@@ -208,6 +208,7 @@ var running;
           // use data.contours
           // render the curves here
           contours = data;
+          console.log(contours)
           fillPoints(contours);
         }
       });

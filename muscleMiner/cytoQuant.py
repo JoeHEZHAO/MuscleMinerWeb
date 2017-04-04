@@ -95,6 +95,12 @@ def segmentation():
             # print filename
             result = dosegmentation(app.config['SAVE_FOLDER_segmentation'],
                 filename, app.config['SAVE_FOLDER_segmentation'] )
+            
+            #write contour into json file
+            # file = open('contour.json', 'w')
+            # file.write(result)
+            # file.close()  
+
             return result
         except Exception as exc:
             print ('error in loading data ', filename)

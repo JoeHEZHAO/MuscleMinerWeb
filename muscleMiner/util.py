@@ -18,7 +18,7 @@ def dosegmentation(imgpath, imgname, savepath):
     print "fuse shape:",fuse.shape
 
     mask = 1 - fuse.copy()
-    size_threshold = 100
+    size_threshold = 0
     fg_threshold = 0.70
     solidity = 1.0
     mask_postprocess = drawcontour.post_processing(
@@ -28,6 +28,8 @@ def dosegmentation(imgpath, imgname, savepath):
     res = drawcontour.mask2contour(im, mask_postprocess,
         color = [0,0,255] , linewidth= 2, border_dist=5)
 
+    # print res
+    # print "1111111111111111111111111111111"
     return res
 
 def createdz(fullimgname, fullwritename=None):

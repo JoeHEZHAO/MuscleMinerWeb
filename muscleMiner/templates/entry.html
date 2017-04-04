@@ -68,5 +68,21 @@
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/viewerinputhook.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/loadingoverlay.min.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/editPaperSeg.js') }}"></script>
+			<script type="text/javascript">
+				    viewer = new OpenSeadragon.Viewer({
+			              id: "openseadragon1",
+			              prefixUrl: "{{ url_for('static', filename='images/') }}",
+			              tileSources: [],
+			              showReferenceStrip: false,
+			              referenceStripSizeRatio: 0.2,
+			              showNavigator: true,
+			              sequenceMode: false,
+			              navigatorId:"myNavigator",
+			              zoomInButton:"zoom-in",
+			              zoomOutButton:"zoom-out",
+			              homeButton:"home",
+			              preserveViewport: true
+					});
+			</script>
 		</body>
 	</html>

@@ -132,11 +132,11 @@ def mask2contour(org, mask, **kwargs):
                 'x' : c[1],
                 'y' : c[0]
             })
-        print 'Added points:', len(points)
+        # print 'Added points:', len(points)
         contour['points'] = points
 
         temp_contours.append(contour)
-        print 'iteration for contours : ',n
+        # print 'iteration for contours : ',n
             #plt.plot(contour[:, 1], contour[:, 0], linewidth=2)
             #contour_mask[contour[:, 1], contour[:, 0]] = 1
 
