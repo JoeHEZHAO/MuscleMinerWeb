@@ -86,18 +86,19 @@ def segmentation():
     print "working here"
     if request.method == 'POST':
         # getting name info
-        filename = 'img_mask1.bmp'
+        print app.config['GLOBAL_FILE_NAME']
+        filename = app.config['GLOBAL_FILE_NAME']
         prefix = filename[:-3]
         try:
             # do segmentation\\
             filename = prefix + 'png'
-            print filename
+            # print filename
             result = dosegmentation(app.config['SAVE_FOLDER_segmentation'],
                 filename, app.config['SAVE_FOLDER_segmentation'] )
             return result
         except Exception as exc:
-            print 'error in loading data ', filename
-            print exc
+            print ('error in loading data ', filename)
+            print (exc)
             result={}
             result["error"]=1
             return jsonify(result)
@@ -133,6 +134,7 @@ def getslides(filename):
         return jsonify(obj_config)
     else:
         # app.config['DEEPZOOM_SLIDE'] = './slides/105357.svs'
+        app.config['GLOBAL_FILE_NAME'] = filename
         app.config['DEEPZOOM_SLIDE'] = './slides/'+filename
         name, ext = os.path.splitext(filename)
         load_slide(name)

@@ -68,6 +68,7 @@ $(document).ready(function() {
             // params.tileSources = obj.tileSources;
             start_slice = 0;
             currentImage = imageOrder[start_slice];
+            console.log(currentImage)
             imagingHelper = viewer.activateImagingHelper({});
 
             // open the currentImage  
