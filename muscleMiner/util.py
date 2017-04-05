@@ -19,7 +19,7 @@ def dosegmentation(imgpath, imgname, savepath):
         res = json.load(json_data) # res is text type file
     out = json.loads(res) # transform text and str type into object
     res = jsonify(out) # make python object a json object
-    return res
+    return res # pass json object to javascript
 
     # fuse = io.imread(os.path.join(imgpath, imgname))
     # im=[]
@@ -38,7 +38,7 @@ def dosegmentation(imgpath, imgname, savepath):
 
     # res_json = res.get_data()
     # with open('contour.json', 'w') as outfile:
-    #     json.dump(res_json, outfile, indent=4, ensure_acsii=False)
+    #     json.dump(res_json, outfile, indent=4)
 
     # return res
 

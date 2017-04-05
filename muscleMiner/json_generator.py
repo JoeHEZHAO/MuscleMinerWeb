@@ -7,7 +7,7 @@ import cv2
 from flask import jsonify
 import drawcontour
 
-fuse = io.imread(os.path.join(imgpath, imgname))
+fuse = io.imread('/home/zhaohe/workspace/muscleMinerWeb/muscleMiner/static/files/segmentation_data/img_mask1.png')
 im=[]
 print "fuse shape:",fuse.shape
 
@@ -26,4 +26,4 @@ res_json = res.get_data()
 with open('contour.json', 'w') as outfile:
     json.dump(res_json, outfile, indent=4, ensure_acsii=False)
 
-return res
+# return res

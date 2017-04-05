@@ -167,9 +167,9 @@
 	textarea {
 		display: block;		
 		max-width: 100%;
-		padding: 5px 10px;
-		border: 2px solid #fbfafd;
+		margin: auto;
 		margin-bottom: 20px;
+		margin-top: 20px;
 		background-color: #fbfafd;
 		color: #6e6e6e;
 	}
@@ -224,7 +224,7 @@
 		outline: none;
 	}
 	
-	button,
+	/*button,
 	input[type="reset"],
 	input[type="submit"],
 	input[type="button"] {
@@ -236,7 +236,7 @@
 		font-size: 16px;
 		-webkit-transition: all 0.3s;
 				transition: all 0.3s;
-	}
+	}*/
 	
 	button:hover,
 	input[type="reset"]:hover,

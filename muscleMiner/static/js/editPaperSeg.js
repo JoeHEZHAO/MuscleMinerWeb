@@ -29,6 +29,21 @@ $(document).ready(function() {
 
           function initMicrodraw() {
 
+            // viewer = new OpenSeadragon.Viewer({
+            //   id: "openseadragon1",
+            //   prefixUrl: "{{ url_for('static', filename='images/') }}",
+            //   tileSources: [],
+            //   showReferenceStrip: false,
+            //   referenceStripSizeRatio: 0.2,
+            //   showNavigator: true,
+            //   sequenceMode: false,
+            //   navigatorId:"myNavigator",
+            //   zoomInButton:"zoom-in",
+            //   zoomOutButton:"zoom-out",
+            //   homeButton:"home",
+            //   preserveViewport: true
+            // });
+
             $.ajax({
                 type: 'GET',
                 url: '/slides',
