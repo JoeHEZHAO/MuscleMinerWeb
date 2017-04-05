@@ -91,7 +91,7 @@ def segmentation():
         prefix = filename[:-3]
         try:
             # do segmentation\\
-            filename = prefix + 'png'
+            filename = prefix + 'json'
             # print filename
             result = dosegmentation(app.config['SAVE_FOLDER_segmentation'],
                 filename, app.config['SAVE_FOLDER_segmentation'] )
@@ -100,7 +100,7 @@ def segmentation():
             # file = open('contour.json', 'w')
             # file.write(result)
             # file.close()  
-
+            # print result
             return result
         except Exception as exc:
             print ('error in loading data ', filename)
