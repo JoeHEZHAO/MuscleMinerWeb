@@ -276,7 +276,8 @@ transition: linear background-color 0.4s;-moz-transition: linear background-colo
 }
 
 #menuBar {
-	position:absolute;
+	/*position:absolute;*/
+	float: left;
 	width:200px;
 	height: 100%;
 	top:0;

@@ -29,21 +29,6 @@ $(document).ready(function() {
 
           function initMicrodraw() {
 
-            // viewer = new OpenSeadragon.Viewer({
-            //   id: "openseadragon1",
-            //   prefixUrl: "{{ url_for('static', filename='images/') }}",
-            //   tileSources: [],
-            //   showReferenceStrip: false,
-            //   referenceStripSizeRatio: 0.2,
-            //   showNavigator: true,
-            //   sequenceMode: false,
-            //   navigatorId:"myNavigator",
-            //   zoomInButton:"zoom-in",
-            //   zoomOutButton:"zoom-out",
-            //   homeButton:"home",
-            //   preserveViewport: true
-            // });
-
             $.ajax({
                 type: 'GET',
                 url: '/slides',
@@ -104,7 +89,6 @@ $(document).ready(function() {
           })
 
   // paper.js is global here
-  paper.install(window);
   var w, h,isDown = false, pIndex = -1,
   pts = [];
   var contours;
@@ -347,7 +331,6 @@ var running;
     fill: true,
     tolerance: 2
   };
-
   var segmentArray = [];
   var segment, path;
   var movePath = false;

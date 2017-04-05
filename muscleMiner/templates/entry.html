@@ -6,8 +6,6 @@
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/cyto.css') }}">  
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic,700,700italic">
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700">
 		<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-2.2.3.js') }}"></script>
 		<title>CytoQuant</title>
 	</head>
@@ -26,6 +24,7 @@
 				<!-- NAVIGATION BAR -->
 			</header><!-- HEADER CONTAINER -->
 
+	<div class="parent" style="position:relative;">
 		<!-- menu -->
 		<div id="menuBar" class="table" style="top: 100px; padding-top: 30px">
 			<div class="row">
@@ -52,7 +51,7 @@
 
 		</div>
 		<!-- pic ends -->
-
+	</div>
 	    <!-- footer start -->
 	    {% block footer %}
 			{% 
@@ -62,27 +61,30 @@
 	    <!-- footer end -->
 
 	</div><!-- MAIN CONTAINER -->
-			<script type="text/javascript" src="{{ url_for('static', filename='js/paper-full.min.js') }}"></script>
+			<script type="text/javascript" src="{{ url_for('static', filename='js/paper-full.js') }}"></script>
+			<script type="text/javascript">
+				  paper.install(window);
+			</script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/openseadragon.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/openseadragon-imaginghelper.min.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/openseadragon/viewerinputhook.js') }}"></script>
 			<script type="text/javascript" src="{{ url_for('static', filename='js/loadingoverlay.min.js') }}"></script>
-			<script type="text/javascript" src="{{ url_for('static', filename='js/editPaperSeg.js') }}"></script>
 			<script type="text/javascript">
-				    viewer = new OpenSeadragon.Viewer({
-			              id: "openseadragon1",
-			              prefixUrl: "{{ url_for('static', filename='images/') }}",
-			              tileSources: [],
-			              showReferenceStrip: false,
-			              referenceStripSizeRatio: 0.2,
-			              showNavigator: true,
-			              sequenceMode: false,
-			              navigatorId:"myNavigator",
-			              zoomInButton:"zoom-in",
-			              zoomOutButton:"zoom-out",
-			              homeButton:"home",
-			              preserveViewport: true
-					});
+			    viewer = new OpenSeadragon.Viewer({
+		              id: "openseadragon1",
+		              prefixUrl: "{{ url_for('static', filename='images/') }}",
+		              tileSources: [],
+		              showReferenceStrip: false,
+		              referenceStripSizeRatio: 0.2,
+		              showNavigator: true,
+		              sequenceMode: false,
+		              navigatorId:"myNavigator",
+		              zoomInButton:"zoom-in",
+		              zoomOutButton:"zoom-out",
+		              homeButton:"home",
+		              preserveViewport: true
+				});
 			</script>
+			<script type="text/javascript" src="{{ url_for('static', filename='js/editPaperSeg.js') }}"></script>
 		</body>
 	</html>
