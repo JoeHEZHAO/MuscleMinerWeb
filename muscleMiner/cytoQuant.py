@@ -88,10 +88,10 @@ def segmentation():
         # getting name info
         # print app.config['GLOBAL_FILE_NAME']
         filename = app.config['GLOBAL_FILE_NAME']
-        prefix = filename[:-3]
+        prefix = filename[:-4]
         try:
             # do segmentation\\
-            filename = prefix + 'json'
+            filename = prefix + '_contours.json'
             # print filename
             result = dosegmentation(app.config['SAVE_FOLDER_segmentation'],
                 filename, app.config['SAVE_FOLDER_segmentation'] )

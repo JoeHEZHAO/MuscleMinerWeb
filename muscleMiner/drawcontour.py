@@ -64,7 +64,7 @@ def deprecated_overlayImg_(img, mask,print_color = [5,119,72],linewidth= 1, alph
 
 
 
-def mask2contour(org, mask, **kwargs):
+def mask2contour(org, imgpath, name, mask, **kwargs):
     '''org are original reference image to be overlaid.
        mask should be binary image, anyway I will modify it using 100 as threshold to binarize it.
 
@@ -76,6 +76,11 @@ def mask2contour(org, mask, **kwargs):
             color
             linewidth
     '''
+
+    try:
+        to_unicode = unicode
+    except NameError:
+        to_unicode = str
 
     mask = mask.astype(int)
     #contour_mask  = np.zeros(mask.shape)
@@ -151,8 +156,18 @@ def mask2contour(org, mask, **kwargs):
     #contour_mask = cv2.dilate(contour_mask,se)
 
     #return overlayImg_(org, contour_mask , print_color = param.color, linewidth = param.linewidth, alpha = 0.8)
+     # Write JSON file
+    json_path = os.path.join(imgpath, name[:-1]+'_contours.json')
 
-    return jsonify(contours)
+    print json_path
+
+    with io.open(json_path, 'w', encoding='utf8') as outfile:
+        str_ = json.dumps(contours,
+                  indent=4, sort_keys=True,
+                  separators=(',', ':'), ensure_ascii=False)
+        outfile.write(to_unicode(str_))
+
+    #return jsonify(contours)
 
 
 def post_processing(mask, **kwargs):

@@ -7,6 +7,8 @@ import cv2
 from flask import jsonify
 import drawcontour
 
+
+
 def dodetection(imgpath, imgname, savepath):
 
     return res
@@ -15,13 +17,15 @@ def dosegmentation(imgpath, imgname, savepath):
     print "--------> do segmentation"
 
     json_path = os.path.join(imgpath, imgname)
+    print json_path
     with open(json_path) as json_data:
-        res = json.load(json_data) # res is text type file
-    out = json.loads(res) # transform text and str type into object
-    res = jsonify(out) # make python object a json object
-    return res # pass json object to javascript
+        res = json.load(json_data) # res is text type file 
+    # out = json.loads(res) # transform text and str type into object
+    # res = jsonify(out) # make python object a json object
+    return jsonify(res)#res # pass json object to javascript
 
-    # fuse = io.imread(os.path.join(imgpath, imgname))
+    # name = imgname[:-4]
+    # fuse = io.imread(os.path.join(imgpath, name+'png'))
     # im=[]
     # print "fuse shape:",fuse.shape
 
@@ -33,14 +37,23 @@ def dosegmentation(imgpath, imgname, savepath):
     #     mask, size_threshold=size_threshold,
     #     fg_threshold=fg_threshold, solidity=solidity)
 
-    # res = drawcontour.mask2contour(im, mask_postprocess,
+    # res = drawcontour.mask2contour(im, imgpath, name, mask_postprocess,
     #     color = [0,0,255] , linewidth= 2, border_dist=5)
 
-    # res_json = res.get_data()
+    #res_json = res.get_data()
     # with open('contour.json', 'w') as outfile:
     #     json.dump(res_json, outfile, indent=4)
 
-    # return res
+    # Write JSON file
+    # json_path = os.path.join(imgpath, name[:-1]+'_contours.json');
+    # print json_path
+    # with io.open(json_path, 'w', encoding='utf8') as outfile:
+    #     str_ = json.dumps(res_json,
+    #               indent=4, sort_keys=True,
+    #               separators=(',', ':'), ensure_ascii=False)
+    #     outfile.write(to_unicode(str_))
+
+    #return res
 
 def createdz(fullimgname, fullwritename=None):
     if fullwritename == None:
