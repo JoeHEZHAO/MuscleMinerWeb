@@ -22,6 +22,7 @@ DEEPZOOM_OVERLAP = 1
 DEEPZOOM_LIMIT_BOUNDS = True
 DEEPZOOM_TILE_QUALITY = 75
 SLIDE_NAME = 'slide'
+prefix = ''
 
 
 # Initialize Flaks instance
@@ -91,10 +92,10 @@ def segmentation():
         prefix = filename[:-4]
         try:
             # do segmentation\\
-            filename = prefix + '_contours.json'
+            # filename = prefix + '_contours.json'
             # print filename
             result = dosegmentation(app.config['SAVE_FOLDER_segmentation'],
-                filename, app.config['SAVE_FOLDER_segmentation'] )
+                prefix, app.config['SAVE_FOLDER_segmentation'] )
             
             #write contour into json file
             # file = open('contour.json', 'w')

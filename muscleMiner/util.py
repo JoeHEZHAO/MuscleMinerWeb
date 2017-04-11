@@ -16,7 +16,7 @@ def dodetection(imgpath, imgname, savepath):
 def dosegmentation(imgpath, imgname, savepath):
     print "--------> do segmentation"
 
-    json_path = os.path.join(imgpath, imgname)
+    json_path = os.path.join(imgpath, imgname+'_contours.json')
     print json_path
     with open(json_path) as json_data:
         res = json.load(json_data) # res is text type file 
