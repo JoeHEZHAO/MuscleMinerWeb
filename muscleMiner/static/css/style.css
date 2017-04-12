@@ -119,6 +119,7 @@ td{
 	height: 800px;
     margin: 0 auto;
     margin-top: 30px;
+	margin-bottom: 30px;
 }
 form {
     display: inline;
